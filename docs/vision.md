@@ -28,4 +28,4 @@ L'expérience est conçue en priorité pour le mobile : commandes tactiles acces
 
 ## Plateformes et progression
 
-La première version sera disponible sur le Web sous forme de PWA. Arcaday sera ensuite proposé sur iOS et Android, en conservant la même vision : des mini-jeux quotidiens accessibles, courts et rejouables.
+La première version est prévue sur le Web sous forme de PWA. Une évolution vers iOS et Android est envisagée, mais son implémentation n’est pas encore décidée. Ces perspectives conservent la même vision : des mini-jeux quotidiens accessibles, courts et rejouables.

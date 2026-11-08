@@ -29,7 +29,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Contexte** : préserver `main` pendant le développement.
 - **Décision** : travailler sur une branche dédiée à chaque tâche, jamais directement sur `main` ; utiliser des commits petits et significatifs au format Conventional Commits.
 - **Justification** : rendre les changements isolables et faciles à revoir.
-- **Conséquences** : inspecter branche et état Git avant toute modification. Pour la mission documentaire actuelle, l’utilisateur impose de conserver `docs/project-vision`, sans créer de nouvelle branche ni commit.
+- **Conséquences** : inspecter branche et état Git avant toute modification. Respecter le périmètre autorisé et les autorisations natives de Codex (ADR-005) ; toute fusion dans `main` requiert une validation humaine explicite (ADR-004).
 
 ## ADR-004 — Validation humaine des fusions et déploiements
 
