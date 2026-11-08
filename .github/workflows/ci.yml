@@ -1,0 +1,38 @@
+name: Arcaday CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    name: Validate project instructions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate AGENTS.md
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -s AGENTS.md
+
+          for heading in "## Project" "## Git Workflow" "## Security" "## Quality"; do
+            grep -Fxq "$heading" AGENTS.md || {
+              echo "Missing required section: $heading"
+              exit 1
+            }
+          done
+
+          echo "AGENTS.md validation passed"
