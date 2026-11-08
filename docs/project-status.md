@@ -1,6 +1,6 @@
 # Arcaday — mémoire du projet
 
-Dernier audit de reprise et contrôle Git local : **8 novembre 2026 (UTC)**. Les versions d’outils et observations d’authentification datent de l’inspection initiale du même jour ; elles n’ont pas été revérifiées pendant cet audit. Ce document constitue le point d’entrée autonome pour reprendre le projet sans les conversations précédentes. Commencer par la section 8, puis revérifier l’état Git : cet instantané ne remplace pas le dépôt vivant.
+Dernière synchronisation de la mémoire et contrôle Git local avant le commit de maintenance : **8 novembre 2026 (UTC)**. Les versions d’outils et observations d’authentification datent de l’inspection initiale du même jour ; elles n’ont pas été revérifiées pendant cette synchronisation. Ce document constitue le point d’entrée autonome pour reprendre le projet sans les conversations précédentes. Commencer par la section 8, puis revérifier l’état Git : cet instantané ne remplace pas le dépôt vivant.
 
 Les mentions **Vérifié** désignent une observation du dépôt ou de l’environnement ; **Rapporté** désigne les informations fournies par l’utilisateur ; **À confirmer** désigne une information non établie. Une intention produit n’est pas une fonctionnalité opérationnelle.
 
@@ -17,7 +17,7 @@ Tu es l’architecte technique accompagnant le développement d’Arcaday. Le pr
 - Ne jamais désactiver les mécanismes de sécurité pour simplifier une opération ; conserver le sandbox et utiliser les autorisations natives.
 - Préserver et signaler les modifications non committées. Ne jamais développer directement sur `main`.
 - Ne jamais fusionner dans `main` sans autorisation explicite ; tout déploiement requiert également une approbation humaine.
-- Pour la mission documentaire actuelle : conserver la branche existante, ne créer ni commit, ni publication, ni PR avant de nouvelles instructions.
+- Pour la mission actuelle : conserver `docs/project-vision`. L’utilisateur a autorisé le commit `docs: establish automatic project memory maintenance`, limité à `AGENTS.md` et `docs/project-status.md`. Publication, PR et fusion restent interdites pendant cette mission.
 
 ChatGPT accompagne les décisions et formule les actions ; Codex exécute les opérations autorisées dans le dépôt et en rapporte les résultats. Si l’assistant dispose lui-même des outils nécessaires, il peut les utiliser dans ce périmètre. Sans accès au dépôt, fournir une seule instruction à transmettre à Codex, puis demander son résultat avant de continuer ; ne jamais prétendre avoir vérifié le serveur depuis ce seul document.
 
@@ -78,17 +78,18 @@ La numérotation ci-dessous est celle fournie par l’utilisateur ; elle n’est
 | 13.6 | Vérification du document et du commit | Validation passée rapportée ; contenu et commit réinspectés lors de cette mission |
 | 13.7 | Publication de `docs/project-vision` sur GitHub | Publication rapportée ; référence locale `origin/docs/project-vision` au même commit, sans vérification distante actuelle |
 
-Les étapes suivantes sont **en attente**, sans nouvelle numérotation historique : revue des documents de mémoire, autorisation de leur commit, vérification ou création de la PR de cette branche, vérification des contrôles distants. L’historique local contient déjà des commits de fusion pour les PR #1 (fondations) et #2 (CI) ; l’expression « première PR » dans la roadmap ne doit pas faire oublier ces précédents.
+La documentation de reprise a été validée par l’utilisateur et les deux documents ont été créés par le commit `ea2306f`, vérifié localement. La section `Project Memory & Continuity` ajoutée à `AGENTS.md` a également été validée par l’utilisateur. Restent à effectuer, sans nouvelle numérotation historique : finalisation du commit de maintenance autorisé, publication des nouveaux commits, vérification ou création de la PR de cette branche et vérification des contrôles distants. L’historique local contient déjà des commits de fusion pour les PR #1 (fondations) et #2 (CI) ; l’expression « première PR » dans la roadmap ne doit pas faire oublier ces précédents.
 
 ## 6. État actuel
 
 ### Vérifié
 
 - Branche de travail : `docs/project-vision` ; aucune nouvelle branche créée.
-- Dernier commit : `c7b272a3645288d3f617e96c4b7eba41ed35743c`, `docs: add Arcaday project vision`, daté du 8 novembre 2026.
+- Dernier commit vérifié avant le commit de maintenance contenant cette mise à jour : `ea2306ffc430bfe881b73222eb86835a699b8dbb`, `docs: add persistent project memory and architecture decisions`. Il a créé uniquement `docs/project-status.md` et `docs/architecture/decisions.md`. À la reprise, consulter Git pour connaître le dernier commit effectif ; le hash du commit en préparation n’est pas anticipé.
 - `main` local pointe sur `3ed43a7` ; il n’a pas été modifié.
-- Avant la création de la mémoire : arbre de travail propre. Au début de l’audit de reprise : `docs/project-status.md` et `docs/architecture/decisions.md` existent déjà, non suivis et non committés ; ils ont été préservés. L’audit modifie uniquement `docs/project-status.md`.
-- La branche et sa référence de suivi locale pointent sur le même commit. Cela ne prouve pas l’état actuel du serveur.
+- Au début de cette mission, seule la modification validée d’`AGENTS.md` était non committée ; elle est préservée. Cette synchronisation modifie uniquement `docs/project-status.md`. Ces deux fichiers constituent le périmètre du commit autorisé ; `decisions.md` reste inchangé.
+- Avant ce commit, la branche est en avance d’un commit sur sa référence de suivi locale, restée à `c7b272a`. Après réussite du commit prévu, l’avance attendue sera de deux commits ; ce résultat devra être vérifié. Aucune consultation distante ne confirme l’état actuel du serveur.
+- La section `Project Memory & Continuity` figure dans `AGENTS.md` : la maintenance de la mémoire fait désormais partie des instructions permanentes de Codex. La règle est documentée et cette synchronisation est explicitement demandée ; son application automatique lors des futures missions reste à vérifier. Aucun mécanisme d’exécution automatique supplémentaire n’a été installé.
 - Test disponible : validation documentaire d’`AGENTS.md` définie dans la CI. Son script a réussi localement lors de cette mission ; l’exécution GitHub Actions reste à confirmer.
 - Aucun test applicatif ni fonctionnalité de jeu opérationnelle n’est démontré par le dépôt.
 - À développer dans ce dépôt : les deux jeux, la génération/distribution des défis quotidiens, les classements, les séries, le partage, l’application Web/PWA et les versions mobiles.
@@ -108,26 +109,29 @@ La publication de la branche sur GitHub et les étapes 13.3 à 13.7 sont déclar
 
 Ces actions restent à réaliser ou à valider, dans cet ordre indicatif :
 
-1. Finaliser et faire relire les deux documents de mémoire ; attendre les instructions avant le commit.
-2. Vérifier l’existence d’une PR pour `docs/project-vision`, puis la créer si nécessaire et autorisé. Ne pas dupliquer une PR existante.
-3. Vérifier les contrôles GitHub Actions de cette PR.
-4. Étudier la sécurisation de l’authentification GitHub pour Codex, avec le minimum de privilèges et sans exposition des secrets.
-5. Automatiser progressivement le cycle Git, en conservant les validations humaines de fusion et de déploiement.
-6. Définir l’architecture applicative et consigner les choix approuvés dans le registre.
-7. Développer le prototype Daily Impossible.
-8. Ajouter les agents de test et de revue, ainsi que les tests adaptés.
+1. Finaliser le commit de maintenance documentaire autorisé, limité à `AGENTS.md` et `docs/project-status.md`.
+2. Publier les nouveaux commits de `docs/project-vision` après autorisation ; la publication historique de la vision ne couvre pas ces changements locaux.
+3. Créer ou vérifier la première PR de cette branche vers `main`, après autorisation. Ne pas dupliquer une PR existante ; les PR #1 et #2 appartiennent déjà à l’historique du dépôt.
+4. Vérifier les contrôles GitHub Actions de cette PR.
+5. Tester la reprise dans un nouveau chat ChatGPT avec ce document seul, puis vérifier le diagnostic contre le dépôt. Ce test reste à réaliser.
+6. Étudier la sécurisation de l’authentification GitHub pour Codex, avec le minimum de privilèges et sans exposition des secrets.
+7. Automatiser progressivement le cycle Git, en conservant les validations humaines de fusion et de déploiement.
+8. Définir l’architecture applicative et consigner les choix approuvés dans le registre.
+9. Développer le prototype Daily Impossible.
+10. Ajouter les agents de test et de revue, ainsi que les tests adaptés.
 
 L’accès GitHub peut devoir être résolu avant les vérifications distantes. Aucun framework, moteur ou orchestrateur personnalisé n’est choisi à ce stade.
 
 ## 8. Prochaine action exacte — point de reprise
 
-- **Étape en cours** : finalisation de la mémoire persistante ; rédaction et audit documentaire de reprise effectués, validation utilisateur en attente. L’audit a isolé la lecture du seul statut avant comparaison des références ; ce n’est pas un essai dans une nouvelle conversation réellement vierge.
-- **Objectif immédiat** : faire approuver le contenu factuel des deux documents avant toute opération de commit.
-- **Déjà effectué** : inspection initiale du dépôt et rédaction des deux fichiers ; audit de lisibilité autonome, comparaison avec les trois références, clarification des rôles et autorisations, contrôle des liens, recherche de secrets et nouvelle exécution locale du script documentaire. Les versions n’ont pas été réévaluées lors de l’audit.
-- **Reste à faire** : revue par l’utilisateur, corrections éventuelles et instructions explicites concernant le commit. Aucune publication ou PR autorisée pour cette mission.
-- **Prochaine action précise** : remettre le résultat de l’audit à l’utilisateur, puis attendre ses instructions. Pour une nouvelle session, la première action technique est d’exécuter `git -C /home/arcaday/arcaday status --short --branch` (ou de demander à Codex de le faire), puis d’examiner le résultat. Vérifier ensuite le dernier commit avec `git -C /home/arcaday/arcaday log -1 --oneline`. Résultat attendu : branche `docs/project-vision`, commit `c7b272a`, uniquement les deux documents non suivis ; Git peut regrouper `decisions.md` sous `?? docs/architecture/`. Si l’état diffère, préserver les changements et actualiser le diagnostic ; si la branche est `main`, ne rien modifier et signaler l’écart, sans créer de branche automatiquement. Si l’état correspond, vérifier les éventuelles instructions utilisateur reçues depuis cet audit avant toute opération Git d’écriture.
-- **Critères de validation** : les deux fichiers existent, distinguent preuves et historique rapporté, indiquent une prochaine action, ne contiennent aucun secret ; aucun autre fichier n’a changé ; aucun commit, push, création de PR ou fusion n’a eu lieu pendant cette mission.
-- **Blocages** : instructions utilisateur nécessaires avant le commit ; authentification de `gh` indisponible pour la vérification distante, sans bloquer la rédaction locale.
+- **Étape en cours** : finalisation du commit de maintenance documentaire, explicitement autorisé par l’utilisateur. Cet instantané est rédigé avant sa création ; il ne déclare pas à l’avance sa réussite.
+- **Objectif immédiat** : enregistrer ensemble les instructions permanentes validées et leur état synchronisé, avec le message `docs: establish automatic project memory maintenance`.
+- **Déjà effectué** : documentation de reprise validée et committée dans `ea2306f` ; section `Project Memory & Continuity` ajoutée à `AGENTS.md` et validée ; statut synchronisé. La règle de maintenance est documentée, mais son application spontanée lors des prochaines missions reste à vérifier. L’audit précédent n’était pas un test dans un chat réellement vierge.
+- **Prochaine action précise** : contrôler les modifications et les validations locales, indexer uniquement `AGENTS.md` et `docs/project-status.md`, examiner `git diff --cached`, exécuter `git diff --cached --check`, puis créer le commit autorisé et vérifier le dernier commit et l’état Git.
+- **À la reprise** : exécuter d’abord `git -C /home/arcaday/arcaday status --short --branch`, examiner le résultat, puis `git -C /home/arcaday/arcaday log -1 --oneline`. Si le commit de maintenance est déjà présent, vérifier son contenu et ne pas le recréer. S’il manque, vérifier le périmètre des changements avant de reprendre sa préparation. Préserver tout changement inattendu ; ne rien modifier si la branche est `main` et signaler l’écart sans changer de branche automatiquement.
+- **Suite prévue après le commit** : publier `docs/project-vision`, créer ou vérifier sa première Pull Request vers `main`, vérifier les contrôles GitHub Actions, puis tester la reprise dans un nouveau chat ChatGPT. Publication et création de PR nécessitent de nouvelles instructions : elles ne sont pas autorisées dans cette mission.
+- **Critères de validation du commit** : message exact, uniquement les deux fichiers autorisés, contrôles locaux réussis, arbre de travail propre après commit, branche conservée, aucun secret introduit ; aucune publication, PR, fusion ou modification de `decisions.md` ou de `main`.
+- **Blocages** : aucun blocage local connu pour la préparation ; utiliser les autorisations natives si Git nécessite des droits supplémentaires. L’authentification distante reste à confirmer avant les étapes GitHub. Le test en nouveau chat et l’application automatique de la règle de maintenance ne sont pas encore validés.
 
 ## 9. Journal de progression
 
@@ -139,8 +143,12 @@ L’accès GitHub peut devoir être résolu avant les vérifications distantes. 
 | Date non fournie | Publication de la branche, étape 13.7 | Rapportée ; référence de suivi locale présente | `origin/docs/project-vision` à `c7b272a` |
 | 2026-11-08 | Création de la mémoire et inspection locale | Deux documents rédigés ; validation documentaire locale réussie ; revue utilisateur en attente | Non committé, base `c7b272a` |
 | 2026-11-08 | Audit de reprise autonome | Lecture isolée du statut puis comparaison des références ; ambiguïtés corrigées ; contrôles locaux réussis ; validation utilisateur toujours en attente | Seul le statut modifié pendant l’audit ; aucun commit |
+| 2026-11-08 | Validation utilisateur et commit de la mémoire | Deux documents créés, contenu du commit vérifié ; aucune publication effectuée | `ea2306f` |
+| 2026-11-08 | Instructions permanentes de maintenance | Section `Project Memory & Continuity` ajoutée et validée ; statut synchronisé ; commit autorisé en préparation, application automatique future à vérifier | Base `ea2306f` ; hash à consulter après création du commit |
 
 ## 10. Protocole de mise à jour
+
+La section `Project Memory & Continuity` d’`AGENTS.md` impose désormais cette maintenance. Avant de terminer une mission importante, vérifier les besoins d’actualisation des deux documents, effectuer les mises à jour autorisées et signaler les documents actualisés. Les inclure dans le même commit que le travail associé lorsque cela est approprié et autorisé. Ne pas mettre à jour la mémoire pour chaque opération mineure, ni déclencher une boucle de mises à jour documentaires ou des commits servant uniquement à rafraîchir les horodatages. Ces mises à jour n’autorisent jamais automatiquement publication, PR, fusion ou déploiement.
 
 Après chaque étape technique importante, mettre à jour ce document dans la branche de travail : date de vérification, état courant, preuves et limites, prochaine action exacte, puis une entrée concise du journal avec référence Git ou PR si disponible. Actualiser le registre lorsqu’une décision est adoptée, remplacée ou abandonnée.
 
