@@ -1,12 +1,12 @@
 # Arcaday — mémoire du projet
 
-Dernière synchronisation de la mémoire après la revue locale de la PR #3, pendant la correction de ses remarques mineures : **8 novembre 2026 (UTC)**. Les versions d’outils et observations d’authentification datent de l’inspection initiale du même jour ; elles n’ont pas été revérifiées pendant cette synchronisation. Ce document constitue le point d’entrée autonome pour reprendre le projet sans les conversations précédentes. Commencer par la section 8, puis revérifier l’état Git : cet instantané ne remplace pas le dépôt vivant.
+Dernière synchronisation de la mémoire : **9 novembre 2026 (Europe/Paris)**, après fusion de la PR #3 et synchronisation locale de `main`. Ce document constitue le point d’entrée autonome pour reprendre le projet sans les conversations précédentes. Commencer par la section 8 ; cet instantané ne remplace pas le dépôt vivant. La présente mise à jour est préparée sans commit sur une branche dédiée.
 
 Les mentions **Vérifié** désignent une observation du dépôt ou de l’environnement ; **Rapporté** désigne les informations fournies par l’utilisateur ; **À confirmer** désigne une information non établie. Une intention produit n’est pas une fonctionnalité opérationnelle.
 
 ## 1. Instructions de reprise pour ChatGPT
 
-Tu es l’architecte technique accompagnant le développement d’Arcaday. Le projet est développé principalement avec Codex CLI. L’utilisateur privilégie le Harness Engineering et souhaite minimiser les interventions manuelles.
+Tu es l’architecte technique accompagnant le développement d’Arcaday. Le projet utilise principalement Codex CLI ; Codex Desktop a aussi été testé avec succès pour le travail sur le dépôt distant. L’utilisateur privilégie le Harness Engineering et souhaite minimiser les interventions manuelles.
 
 - Travailler étape par étape, avec une seule action concrète à la fois.
 - Expliquer brièvement les actions avant de les proposer.
@@ -17,7 +17,7 @@ Tu es l’architecte technique accompagnant le développement d’Arcaday. Le pr
 - Ne jamais désactiver les mécanismes de sécurité pour simplifier une opération ; conserver le sandbox et utiliser les autorisations natives.
 - Préserver et signaler les modifications non committées. Ne jamais développer directement sur `main`.
 - Ne jamais fusionner dans `main` sans autorisation explicite ; tout déploiement requiert également une approbation humaine.
-- Pour la mission de correction de la revue de la PR #3 : conserver `docs/project-vision` et modifier uniquement `docs/architecture/decisions.md`, `docs/vision.md` et `docs/project-status.md`. Ne pas modifier `AGENTS.md` ni aucun autre fichier. Aucun commit, publication, création de PR ou fusion n’est autorisé ; attendre l’autorisation de l’utilisateur avant le commit.
+- Pour cette mise à jour : branche `docs/update-project-status-after-first-merge`, créée depuis `main` synchronisée ; seul `docs/project-status.md` peut être modifié. Aucun commit, publication, création de PR ou fusion autorisé. Attendre l’autorisation de l’utilisateur avant le commit.
 
 ChatGPT accompagne les décisions et formule les actions ; Codex exécute les opérations autorisées dans le dépôt et en rapporte les résultats. Si l’assistant dispose lui-même des outils nécessaires, il peut les utiliser dans ce périmètre. Sans accès au dépôt, fournir une seule instruction à transmettre à Codex, puis demander son résultat avant de continuer ; ne jamais prétendre avoir vérifié le serveur depuis ce seul document.
 
@@ -46,25 +46,31 @@ Cette ambition est validée comme direction par l’utilisateur. Elle ne décrit
 
 ## 4. Environnement technique
 
-| Élément | Observation de l’inspection initiale du 8 novembre 2026, non revérifiée ici |
+| Élément | Observation et provenance |
 | --- | --- |
-| Système | Ubuntu 24.04.4 LTS, Noble Numbat |
+| Système | Ubuntu 24.04.4 LTS, Noble Numbat ; inspection initiale du 8 novembre, non revérifiée ici |
 | Répertoire de travail | `/home/arcaday/arcaday` |
-| Utilisateur Linux de la session | `arcaday`, UID/GID 1001, shell `/bin/bash`, groupes `arcaday` et `nogroup` |
+| Utilisateur Linux dédié | `arcaday`, vérifié par `whoami` dans cette conversation ; UID/GID 1001 et groupes issus de l’inspection initiale |
+| Accès au projet | Connexion SSH dédiée `hetzner-arcaday`, indiquée par l’utilisateur ; répertoire vérifié dans cette conversation |
+| Codex Desktop | Testé avec succès : inspection, fetch et synchronisation Git avec autorisations natives |
 | Autres utilisateurs concernés | À confirmer ; aucun rôle d’administration supplémentaire établi |
 | Dépôt GitHub configuré | `WilliamBamba/arcaday` |
 | Remote `origin` | `https://github.com/WilliamBamba/arcaday.git` pour lecture et publication |
-| Codex CLI | `0.153.4` |
+| Codex CLI | `0.153.4`, disponible et vérifié dans cette conversation |
 | Git / GitHub CLI | `2.43.0` / `2.45.0` |
 | Node.js / npm | `v20.20.1` / `10.8.2` ; présence des outils, pas choix de stack applicative |
 | Python | `3.12.3` ; aucun usage applicatif établi |
-| Configuration Git | Dépôt non bare ; identité `WilliamBamba`, adresse GitHub noreply configurée ; suivi de `origin/docs/project-vision` |
+| Configuration Git | Dépôt non bare ; identité `WilliamBamba`, adresse GitHub noreply configurée ; `main` suit `origin/main` ; branche documentaire actuelle sans suivi distant |
 
-Structure présente avant la création de la mémoire : `README.md`, `AGENTS.md`, `docs/vision.md` et `.github/workflows/ci.yml`. Aucun code applicatif, manifeste de dépendances, moteur de jeu, backend, base de données ou configuration de déploiement n’est présent dans les fichiers suivis inspectés. Les deux documents de mémoire complètent cette structure.
+Structure initiale avant la création de la mémoire : `README.md`, `AGENTS.md`, `docs/vision.md` et `.github/workflows/ci.yml`. Aucun code applicatif, manifeste de dépendances, moteur de jeu, backend, base de données ou configuration de déploiement n’est présent dans les fichiers suivis inspectés. Les deux documents de mémoire complètent cette structure.
 
 **CI vérifiée dans le fichier**, nommée `Arcaday CI` : déclenchement sur les Pull Requests et les pushes vers `main`, job `documentation` sur `ubuntu-latest`, délai maximal de cinq minutes, permission `contents: read`, `actions/checkout@v7` avec `persist-credentials: false`. Le script vérifie qu’`AGENTS.md` est non vide et comporte les titres Project, Git Workflow, Security et Quality. Il ne valide pas les nouveaux documents ni un jeu. Aucun déploiement automatique n’y est défini.
 
-**À confirmer indépendamment** : état distant actuel de la PR et de la CI après les futures corrections, protections de branche GitHub, mécanisme utilisé pour la publication précédente, configuration durable de l’authentification et éventuels services hors dépôt. Le succès CI rapporté par l’utilisateur est consigné en section 6. Ne pas lire ou recopier de secrets pour compléter cette mémoire.
+Les versions de Git, GitHub CLI, Node.js, npm et Python ci-dessus proviennent de l’inspection initiale du 8 novembre et n’ont pas été revérifiées pendant cette mise à jour.
+
+**Séparation des accès** : la connexion SSH au serveur, l’identité d’auteur Git et l’authentification GitHub sont distinctes. Le remote utilise HTTPS. La synchronisation précédente a réussi avec `GIT_TERMINAL_PROMPT=0`, `GIT_ASKPASS=/bin/false` et `git -c credential.helper= fetch` : aucun jeton fourni ni authentification interactive demandée. Cela ne prouve pas que Codex dispose d’un accès de publication. Les écritures dans `.git` ont nécessité les autorisations natives du sandbox pour le fetch, le changement de branche et l’avance rapide ; la création de la branche actuelle a également réussi après autorisation native. Ne pas désactiver le sandbox ni copier de secrets ; arrêter et signaler toute authentification nécessaire.
+
+**À confirmer indépendamment** : protections de branche, mécanisme de publication antérieur, authentification durable de GitHub et éventuels services hors dépôt. Le succès GitHub Actions reste une information rapportée par l’utilisateur ; aucun nouveau contrôle distant n’a été exécuté pendant cette mise à jour.
 
 ## 5. Historique des étapes validées
 
@@ -76,63 +82,69 @@ La numérotation ci-dessous est celle fournie par l’utilisateur ; elle n’est
 | 13.4 | Suppression de la branche temporaire | Rapporté ; aucune preuve spécifique de suppression examinée |
 | 13.5 | Création autonome de `docs/vision.md` et commit `c7b272a` | Fichier et commit vérifiés ; autonomie rapportée |
 | 13.6 | Vérification du document et du commit | Validation passée rapportée ; contenu et commit réinspectés lors de cette mission |
-| 13.7 | Publication de `docs/project-vision` sur GitHub | Publication rapportée ; référence de suivi à `c7b272a` lors de l’inspection initiale, désormais à `e662714` ; sans vérification distante actuelle |
+| 13.7 | Publication de `docs/project-vision` sur GitHub | Publication rapportée ; référence de suivi à `c7b272a` lors de l’inspection initiale, à `9cad028` lors de la synchronisation récente ; historique de publication rapporté |
 
-La création des documents de mémoire dans `ea2306f` et la maintenance via `AGENTS.md` dans `e662714` sont vérifiées dans l’historique local. Leur validation utilisateur a été rapportée lors des missions précédentes. La publication de `docs/project-vision` et l’existence de la PR #3 sont rapportées par l’utilisateur ; la référence locale de suivi pointe désormais sur `e662714`. L’historique local contient aussi les fusions des PR #1 (fondations) et #2 (CI) : la PR #3 est la première PR de cette branche, pas du dépôt.
+Les réalisations terminées sont : première documentation de vision (`c7b272a`), mémoire persistante et registre des décisions (`ea2306f`), règles de maintenance dans `AGENTS.md` (`e662714`), première revue indépendante locale par Codex, correction des trois remarques documentaires (`9cad028`), validation GitHub Actions rapportée, fusion de la PR #3 et synchronisation locale de `main`.
+
+La revue locale consignée dans la mémoire précédente portait sur `3ed43a7` → `e662714` : aucun problème bloquant ni important, trois remarques mineures, recommandation **COMMENT**. Les corrections concernent ADR-003, le point de reprise et la formulation iOS/Android. Leur commit a été inspecté dans cette conversation : seuls les trois documents autorisés ont changé. La revue est terminée ; elle n’a pas été rejouée ici.
+
+Les PR #1 (fondations) et #2 (CI) précèdent la PR #3. Celle-ci est la première PR documentaire de cette branche, pas la première PR du dépôt.
 
 ## 6. État actuel
 
 ### Vérifié localement
 
-- Branche conservée : `docs/project-vision`. Dernier commit : `e662714`, `docs: establish automatic project memory maintenance` ; il modifie uniquement `AGENTS.md` et `docs/project-status.md`.
-- Le commit `ea2306f`, `docs: add persistent project memory and architecture decisions`, crée les deux documents de mémoire.
-- `main` local pointe sur `3ed43a7`. La référence locale `origin/docs/project-vision` pointe sur `e662714`, sans avance ni retard local ; cela ne constitue pas une interrogation actuelle de GitHub.
-- L’arbre de travail était propre au début de la correction. Les modifications de cette mission sont limitées aux trois documents autorisés, non committées ; `AGENTS.md` reste inchangé.
-- Revue locale Codex terminée : comparaison complète de `main` à `e662714`, trois commits et quatre fichiers examinés. Aucun problème bloquant ni important identifié ; recommandation **COMMENT**.
-- Trois remarques mineures ont été identifiées : restriction temporaire de commit dans ADR-003, point de reprise devenu ancien, formulation divergente sur iOS/Android. Leur correction constitue la mission en cours ; les modifications sont préparées localement, sans commit ni publication.
-- La section `Project Memory & Continuity` d’`AGENTS.md` impose la maintenance de la mémoire. Aucun mécanisme d’exécution automatique supplémentaire n’a été installé ; son application spontanée lors de futures missions reste à évaluer.
-- Pendant la revue locale, le script documentaire de la CI et `git diff --check` ont réussi, les six liens relatifs étaient valides et aucun secret n’a été identifié par lecture et recherche de motifs courants. Les contrôles ont également réussi sur les corrections : script CI local, `git diff --check`, dix sections du statut, neuf ADR complets, six liens relatifs valides et périmètre limité aux trois fichiers autorisés. La relecture des quatre documents n’a pas révélé de contradiction restante ; aucun secret détecté par lecture et recherche de motifs courants, sans garantie exhaustive.
-- Aucun code applicatif ni test applicatif n’est présent. Restent à développer les jeux, les défis quotidiens, classements, séries, partage et Web/PWA ; l’implémentation iOS/Android reste à décider.
+- `main` et `origin/main` pointent sur **`1594d78e32878beb0b7c2aea170bfebfdf5d0a78`**, message `docs: establish Arcaday project vision and persistent memory`.
+- Le fetch précédent a récupéré ce commit depuis GitHub, puis `git merge --ff-only origin/main` a fait avancer `main` depuis `3ed43a7`. L’arbre de travail était propre après synchronisation et au début de cette mission.
+- L’ancienne branche `docs/project-vision` est conservée à `9cad0286244f6d7b7ef4c649a75eb9fcc964ef45`. Son contenu est identique au commit squash de `main` ; ses quatre commits ne sont pas devenus des ancêtres de `main`. Ne pas les refusionner ni les recréer.
+- Branche de cette mission : **`docs/update-project-status-after-first-merge`**, créée depuis `main` synchronisée. La présente modification porte uniquement sur `docs/project-status.md` ; elle n’est pas encore committée. À la reprise, vérifier le dépôt avant de déduire si son commit a été autorisé et créé depuis cet instantané.
+- `README.md`, `AGENTS.md`, `docs/vision.md`, `docs/project-status.md` et `docs/architecture/decisions.md` sont présents. Les règles de maintenance sont intégrées dans `AGENTS.md`.
+- Aucun code applicatif ni test applicatif n’est présent dans les fichiers suivis. Jeux, défis quotidiens, classements, séries, partage et Web/PWA restent à développer ; l’implémentation iOS/Android reste à décider.
 
 ### Rapporté par l’utilisateur — GitHub distant
 
-- `docs/project-vision` a été publiée sur GitHub ; la PR **#3** existe vers `main`.
-- Selon le résultat de `gh` rapporté par l’utilisateur : PR #3 **OPEN**, **MERGEABLE**, **CLEAN** ; contrôle GitHub Actions **Validate project instructions : SUCCESS**.
-- Ces résultats distants n’ont pas été revérifiés par Codex pendant la revue ou cette correction locale. Ils précèdent la publication des corrections et ne prouvent pas leur validation par GitHub Actions. Ils ne constituent pas une autorisation de fusion.
+- PR **#3 fusionnée avec Squash and Merge** ; le commit récupéré et l’égalité des contenus corroborent localement cette intégration. L’état de la PR via l’API n’a pas été interrogé.
+- GitHub Actions validé : résultat précédemment rapporté **Validate project instructions : SUCCESS**. Cette preuve historique ne permet pas d’affirmer le résultat d’une exécution sur le commit squash ou sur la présente mise à jour.
+
+### État de l’automatisation
+
+**Fonctionnel**, avec un périmètre de preuve explicite :
+
+- Création de branches et modification de fichiers par Codex : constatées dans cette session.
+- Commits : présents et vérifiés dans l’historique, réalisation antérieure par Codex rapportée ; aucun nouveau commit créé pendant cette mission.
+- Revue locale et validations documentaires : réalisées lors des missions précédentes et consignées dans la mémoire ; contrôles documentaires à rejouer pour chaque changement pertinent.
+- Synchronisation Git avec autorisations natives : fetch, changement de branche et avance rapide réussis dans Codex Desktop.
+- CI GitHub Actions : workflow présent, succès distant rapporté par l’utilisateur.
+
+**Pas encore automatisé de bout en bout** : publication des branches par Codex, création de Pull Requests, revue automatique sur GitHub, fusion contrôlée et déploiement. La fusion manuelle de la PR #3 ne valide pas une automatisation de la fusion. Aucun mécanisme supplémentaire d’exécution automatique n’a été installé par la maintenance documentaire.
 
 ### À confirmer et limites
 
-- Revérifier la PR #3 et ses contrôles après publication du futur commit de correction.
-- Lors de l’inspection initiale, `gh pr list` demandait une authentification. Cet ancien échec ne contredit pas le résultat ultérieur rapporté par l’utilisateur ; la configuration d’authentification de la session Codex reste à confirmer avant les opérations distantes. Ne pas demander ni recopier de jeton dans la conversation.
-- L’inspection initiale de `codex --version` signalait l’impossibilité de créer des alias PATH sur un système de fichiers en lecture seule. Situation non revérifiée ; aucune sécurité modifiée.
-- Le test de reprise dans un nouveau chat reste à effectuer après la fusion autorisée. Aucun bug applicatif évalué puisqu’aucune application n’est présente.
+- Le test de reprise dans une nouvelle conversation avec ce document seul reste à réaliser : c’est la priorité immédiate.
+- L’authentification GitHub de Codex pour les opérations de publication reste à établir ; un ancien échec de `gh pr list` demandant une authentification ne contredit pas le fetch HTTPS réussi sans gestionnaire d’identifiants.
+- `codex --version` a affiché sa version avec un avertissement concernant la création impossible d’alias PATH sur un système de fichiers en lecture seule. Les opérations Git autorisées ont néanmoins réussi ; aucune sécurité n’a été désactivée.
+- Aucun bug applicatif évalué, puisqu’aucune application n’est présente.
 
 ## 7. Roadmap
 
-Ces actions restent à réaliser ou à valider, dans cet ordre indicatif :
+Ces actions restent à réaliser ou à valider, dans cet ordre :
 
-1. Vérifier les corrections documentaires des trois remarques mineures et présenter les résultats à l’utilisateur.
-2. Après autorisation de l’utilisateur, créer un commit de correction limité aux trois documents autorisés.
-3. Publier la branche après autorisation, puis revérifier la PR #3 existante et les contrôles GitHub Actions sur le nouveau commit. Ne pas créer de nouvelle PR.
-4. Procéder à la fusion uniquement après validation explicite de l’utilisateur et vérification des contrôles.
-5. Tester ensuite la reprise dans un nouveau chat ChatGPT avec ce document seul, puis comparer le diagnostic au dépôt.
-6. Étudier la sécurisation de l’authentification GitHub pour Codex, avec le minimum de privilèges et sans exposition des secrets.
-7. Automatiser progressivement le cycle Git, en conservant les validations humaines de fusion et de déploiement.
-8. Définir l’architecture applicative et consigner les choix approuvés dans le registre.
-9. Développer le prototype Daily Impossible.
-10. Ajouter les agents de test et de revue, ainsi que les tests adaptés.
+1. Tester la reprise d’Arcaday dans une nouvelle conversation ChatGPT utilisant uniquement la version actualisée de `docs/project-status.md`.
+2. Après validation de cette reprise, poursuivre le Harness Engineering : définir puis automatiser progressivement le workflow GitHub sécurisé (publication, PR, revue et fusion contrôlée), avec le minimum de privilèges et les validations humaines requises.
+3. Définir l’architecture applicative et consigner les choix approuvés dans le registre.
+4. Développer le prototype Daily Impossible.
+5. Ajouter progressivement les agents de test et de revue, les tests adaptés et les déploiements contrôlés.
 
-Aucun framework, moteur ou orchestrateur personnalisé n’est choisi à ce stade.
+Aucun framework, moteur ou orchestrateur personnalisé n’est choisi. Le commit de la présente mémoire attend une autorisation séparée ; il ne faut pas confondre sa finalisation avec une nouvelle exécution des étapes de la PR #3.
 
 ## 8. Prochaine action exacte — point de reprise
 
-- **Étape en cours** : correction locale des trois remarques mineures de la revue de la PR #3. Les modifications documentaires sont préparées et les contrôles locaux ont réussi ; leur commit et leur publication ne sont pas réalisés.
-- **Déjà effectué** : commits `ea2306f` et `e662714` vérifiés localement ; revue locale Codex effectuée, sans problème bloquant ni important. Publication de la branche, existence de la PR #3 et succès CI rapportés par l’utilisateur, avec les limites de la section 6.
-- **Prochaine action précise** : faire valider les corrections documentaires par l’utilisateur et attendre son autorisation explicite avant toute création de commit. La cohérence avec `AGENTS.md`, les liens, la recherche de secrets et `git diff --check` ont été contrôlés localement. À la reprise, vérifier si le diff a changé avant de préparer le commit autorisé.
-- **À la reprise** : examiner `git -C /home/arcaday/arcaday status --short --branch`, puis `git -C /home/arcaday/arcaday log -1 --oneline` et le diff. Préserver les corrections non committées ; ne pas recréer les commits déjà présents. Si le commit de correction existe déjà, examiner son contenu avant de déterminer la suite. Signaler toute branche ou modification inattendue sans changer de branche automatiquement.
-- **Suite prévue, non réalisée** : après autorisation, créer le commit de correction, publier la branche après autorisation, vérifier de nouveau la PR #3 et la CI, puis fusionner uniquement après validation explicite de l’utilisateur. Tester ensuite la reprise dans un nouveau chat. Aucune nouvelle PR n’est nécessaire.
-- **Périmètre du futur commit** : uniquement `docs/architecture/decisions.md`, `docs/vision.md` et `docs/project-status.md`, avec un message Conventional Commits et des contrôles locaux réussis. `AGENTS.md` reste inchangé.
-- **Autorisations en attente** : commit, publication et fusion ne sont pas autorisés par la mission de correction. Aucun résultat distant ancien ne dispense de revérifier les contrôles ni d’obtenir la validation humaine de fusion.
+- **Priorité immédiate** : tester une reprise dans une nouvelle conversation ChatGPT avec ce document seul. Ne pas recommencer la vision, la mémoire, le registre, les règles de maintenance, la revue, les corrections ou la synchronisation déjà terminées.
+- **Action à proposer directement** : fournir la version actualisée de ce document à une nouvelle conversation et lui demander de résumer l’état vérifié, les limites, les rôles et la prochaine action, sans modifier le dépôt. Ne pas créer cette conversation automatiquement sans demande de l’utilisateur.
+- **Critères de réussite** : le nouvel assistant identifie Arcaday/NUSINI et les deux jeux ; distingue les objectifs de l’architecture encore non implémentée ; connaît les rôles ChatGPT/Codex, SSH et HTTPS, le sandbox, les autorisations et la séparation des identifiants ; reconnaît la PR #3 fusionnée et `main` synchronisée ; distingue les capacités fonctionnelles de l’automatisation incomplète ; propose ensuite le travail sur le workflow GitHub sécurisé, après validation du test.
+- **État de cette mise à jour** : préparée sur `docs/update-project-status-after-first-merge`, seul `docs/project-status.md` modifié ; attendre l’autorisation de l’utilisateur avant le commit. Ne pas anticiper son hash ni sa publication. Le test peut utiliser cette version de travail sans attendre sa publication.
+- **Si accès au dépôt** : lire `AGENTS.md`, examiner `git status --short --branch`, `git log -1 --oneline` et le diff avant toute action dépendante. Préserver toute modification non committée. Si la mémoire a déjà été committée, ne pas recréer le commit ; si la branche est `main`, ne pas y développer. Sans accès, présenter les faits de ce document comme un instantané et demander uniquement le résultat nécessaire à l’étape suivante.
+- **Après validation de la reprise** : préparer la prochaine mission de Harness Engineering, en commençant par le périmètre et les droits nécessaires à l’automatisation GitHub. Ni publication, ni PR, ni fusion, ni déploiement ne sont autorisés par cette mise à jour.
 
 ## 9. Journal de progression
 
@@ -149,6 +161,10 @@ Aucun framework, moteur ou orchestrateur personnalisé n’est choisi à ce stad
 | Date du résultat distant non précisée | Publication et PR #3 | Selon l’utilisateur : branche publiée, PR OPEN, MERGEABLE et CLEAN ; Validate project instructions SUCCESS | Résultat de `gh` rapporté par l’utilisateur, non revérifié par Codex |
 | 2026-11-08 | Revue locale Codex de la PR #3 | Aucun problème bloquant ni important ; trois remarques mineures ; recommandation COMMENT | Comparaison locale `3ed43a7` → `e662714` |
 | 2026-11-08 | Correction des remarques de revue | Trois documents corrigés localement ; cohérence, script CI, liens, structure, recherche de secrets et diff contrôlés ; aucun commit ni publication | Modifications non committées sur la base `e662714` |
+| 2026-11-09 (Europe/Paris) | Vérification des corrections committées | Trois documents uniquement ; arbre propre | `9cad028` sur `docs/project-vision` |
+| 2026-11-09 (Europe/Paris) | Fusion de la PR #3 | Squash and Merge rapporté par l’utilisateur ; contenu récupéré identique à la branche documentaire | `1594d78` |
+| 2026-11-09 (Europe/Paris) | Test Codex Desktop et synchronisation | Fetch et avance rapide réussis avec autorisations natives ; `main` alignée sur `origin/main`, arbre propre ; ancienne branche conservée | `3ed43a7` → `1594d78` |
+| 2026-11-09 (Europe/Paris) | Actualisation de la mémoire après fusion | Branche dédiée créée ; seul le statut actualisé ; commit en attente d’autorisation ; test en nouvelle conversation à réaliser | Base `1594d78` |
 
 ## 10. Protocole de mise à jour
 
