@@ -45,10 +45,10 @@ Ne pas supprimer une ancienne version pendant une session de test.
 
 ## Version stable future — proposition, non activée
 
-Un timer utilisateur pourrait vérifier périodiquement la dernière révision
-`origin/main` et ses contrôles GitHub, via un accès en lecture seule. Il ne
-publierait que le SHA validé et fusionné par un humain, jamais une branche PR.
-L’agent peut également lancer cette même procédure à la demande.
+Proposition minimale : une commande lancée par l’agent après approbation humaine
+d’un SHA précis de main, déjà fusionné et validé. Elle vérifierait les contrôles
+GitHub via un accès en lecture seule. Aucun timer ou déclenchement sur push
+n’est proposé pour cette première étape.
 
 1. Télécharger le SHA exact dans un répertoire de travail temporaire isolé,
    sans changer le dépôt de développement ; confirmer qu’il appartient à main.
@@ -61,6 +61,6 @@ L’agent peut également lancer cette même procédure à la demande.
 
 Un verrou interdit deux déploiements concurrents. Conserver au moins la version
 précédente et les journaux. Le service stable aura un port et une carte Homepage
-distincts. Le mode d’accès GitHub et le timer devront être validés avant activation ;
+distincts. Le mode d’accès GitHub et la procédure devront être validés avant activation ;
 aucun élargissement des permissions de l’App, runner administrateur ou webhook
 public n’est nécessaire. Aucun déploiement automatique n’est activé par ces fichiers.
