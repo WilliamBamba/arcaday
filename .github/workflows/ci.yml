@@ -14,10 +14,8 @@ jobs:
     name: Validate project instructions
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -25,15 +23,27 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           test -s AGENTS.md
-
           for heading in "## Project" "## Git Workflow" "## Security" "## Quality"; do
-            grep -Fxq "$heading" AGENTS.md || {
-              echo "Missing required section: $heading"
-              exit 1
-            }
+            grep -Fxq "$heading" AGENTS.md || exit 1
           done
-
           echo "AGENTS.md validation passed"
-https://github.com/WilliamBamba/arcaday/blob/codex/daily-impossible-prototype/.github/workflows/ci.yml?utm_source=chatgpt.com
+
+  gameplay:
+    name: Validate playable prototype
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
