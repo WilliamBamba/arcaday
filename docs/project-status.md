@@ -1,6 +1,6 @@
 # Arcaday — mémoire du projet
 
-Dernière synchronisation de la mémoire : **15 novembre 2026 (Europe/Paris)**, pendant la préparation du premier incrément jouable Daily Impossible. Ce document permet une reprise autonome ; commencer par la section 8 puis vérifier Git, car cet instantané ne remplace pas le dépôt vivant.
+Dernière synchronisation de la mémoire : **15 novembre 2026 (Europe/Paris)**, après installation du serveur local de prévisualisation privée, accès HTTPS et Homepage encore bloqués par les droits système. Ce document permet une reprise autonome ; commencer par la section 8 puis vérifier Git, car cet instantané ne remplace pas le dépôt vivant.
 
 Les mentions **Vérifié** désignent une observation du dépôt ou de l’environnement ; **Rapporté** désigne les informations fournies par l’utilisateur ; **À confirmer** désigne une information non établie. Une intention produit n’est pas une fonctionnalité opérationnelle.
 
@@ -108,6 +108,16 @@ Les PR #1 (fondations) et #2 (CI) précèdent la PR #3. Celle-ci est la premièr
 - Environnement des tests : Chromium téléchargé ; installation système des bibliothèques impossible sans mot de passe sudo. `libnspr4` et `libnss3` téléchargées/extraites dans `/tmp/arcaday-browser-libs`, tests exécutés avec `LD_LIBRARY_PATH=/tmp/arcaday-browser-libs/runtime/usr/lib/x86_64-linux-gnu`. Aucune modification système. L’extension CI est différée (permission `workflows` absente) ; les tests applicatifs ne sont donc pas automatiques sur GitHub dans cet incrément. La proposition de workflow est conservée localement dans `/tmp/arcaday-prototype-ci.patch`, hors dépôt.
 - Quotidien, backend, classements, obstacles complexes, décorations détaillées, PWA installable et distribution native absents, conformément au périmètre.
 
+### Prévisualisation privée — état vérifié le 15 novembre 2026
+
+- Branche PR #8 synchronisée par avance rapide de `77c2b47` à `8f60556`, arbre initial propre. Les deux nouveaux commits ajoutent la CI applicative ; les mentions historiques de CI différée ci-dessus sont désormais dépassées. Aucun workflow modifié dans cette mission.
+- `npm ci`, `npm run check` : types stricts, 5 tests unitaires et build réussis ; 3 tests Chromium réussis avec les bibliothèques temporaires déjà présentes. Avertissement de taille Phaser conservé.
+- `arcaday-preview.service` utilisateur installé, enabled et active/running, zéro redémarrage observé. Code serveur dans `~/.local/lib/arcaday`, releases dans `~/.local/share/arcaday-preview`, révision publiée `8f60556e481b0d640666045e1a8edc89cd31d6e9`.
+- Écoute vérifiée exclusivement sur `127.0.0.1:4173`. HTML, JS et métadonnées de révision répondent 200 ; accès `.git`, traversée de répertoire et listing répondent 404. Un test de publication vérifie bascule, préservation de la version précédente et refus des liens symboliques/écrasements.
+- `Restart=on-failure` actif ; démarrage après reboot sans connexion **non garanti** car `Linger=no`. Pas de règle réseau ni de configuration Tailscale modifiée. 8443 libre ; Funnel inactif. URL privée non opérationnelle à ce stade.
+- Homepage HTTP local répond 200 ; aucune sauvegarde/modification effectuée car configuration inaccessible. Un fragment de carte a été préparé hors dépôt dans `/tmp/arcaday-homepage-card.yaml`.
+- Scripts génériques et mode opératoire dans `ops/`, sans nom DNS privé ni configuration serveur privée versionnée.
+
 ### Rapporté par l’utilisateur — protections, CI et revues
 
 - **GitHub Actions fonctionnelles** : CI de la PR #6 passée selon l’utilisateur ; workflow local et validations documentaires vérifiés. Aucun résultat distant de CI n’a été réinterrogé pour cette consignation.
@@ -137,11 +147,12 @@ La stack du prototype et son périmètre sont validés (ADR-010 à ADR-012). Auc
 
 ## 8. Prochaine action exacte — point de reprise
 
-- **Priorité** : revue du prototype et validation sur Safari iOS / Chrome Android réels : confort, simultanéité tactile, interruptions, orientation, zones sûres, fluidité et chargement.
-- **À la reprise** : inspecter Git et la PR associée à `codex/daily-impossible-prototype`, consulter ses contrôles et ses éventuels retours. Ne pas recréer le prototype ni la PR.
-- **Autorisation de cette mission** : implémentation, tests, commit, publication et ouverture de PR explicitement demandés. Aucune fusion, aucun déploiement, aucune modification des protections.
-- **Méthode** : lire `AGENTS.md`, préserver les modifications existantes, utiliser les commandes du README. Le serveur de développement reste local ; aucun site public n’est livré.
-- **Sécurité** : publication via le helper Git existant et PR via le jeton temporaire de l’App, sans afficher ni enregistrer de secret. Une CI verte ou une approbation GitHub ne vaut jamais instruction de fusion.
+- **Priorité** : terminer l’activation privée sans demander à l’utilisateur d’exécuter des commandes serveur. Le service utilisateur est installé et actif ; le proxy HTTPS et la carte Homepage ne le sont pas.
+- **Droits manquants** : `arcaday` dispose uniquement de sudo sans mot de passe pour le générateur de jeton GitHub sous `william`. `sudo -n loginctl enable-linger arcaday` et la lecture Docker ciblée échouent avec mot de passe requis ; Tailscale Serve refuse la modification par cet utilisateur. Une approbation native ne crée pas de privilèges Linux.
+- **Intervention précise à autoriser via un canal administrateur existant** : activer le linger pour `arcaday`, ajouter uniquement Serve privé 8443 vers `127.0.0.1:4173`, identifier le montage Homepage, sauvegarder son fichier de services puis ajouter uniquement la carte Arcaday. Ne pas créer de sudoers général ni changer l’opérateur Tailscale global.
+- **Vérifications restantes** : démarrage sans session, proxy HTTPS depuis le tailnet, carte Homepage et accès iPhone. Homepage HTTP local répond 200 avant modification ; son fichier n’a pas pu être identifié faute de droits.
+- **État stable** : aucun déploiement automatique configuré. Proposition documentée dans `ops/README.md` : révision exacte de main validée, build isolé, publication atomique, contrôle de santé et retour arrière, stockage séparé du prototype.
+- **Autorisations** : la mission actuelle autorise le déploiement privé et l’intégration à Homepage ; aucune fusion PR #7/#8 ni exposition publique. Préserver les autres services.
 
 ## 9. Journal de progression
 
@@ -179,6 +190,6 @@ Après chaque étape technique importante, mettre à jour ce document dans la br
 
 Vérifier les commandes et leurs résultats avant de déclarer une réussite. Distinguer un contrôle local d’un contrôle distant, une configuration d’un service opérationnel, et une tâche planifiée d’une tâche terminée. Si une information devient invérifiable, la marquer à confirmer plutôt que la déduire.
 
-Pour reproduire les contrôles documentaires, vérifier les dix sections du statut, les décisions ADR-001 à ADR-012 et leurs champs, ainsi que les cibles des liens relatifs ; relire les deux fichiers pour exclure les données sensibles et rechercher les motifs courants de jetons ou clés privées sans afficher leurs valeurs. Rejouer localement le bloc `run` du workflow existant avec Bash. Examiner `git diff --check`, l’état Git et la liste des fichiers non suivis : `git diff` seul n’inclut pas ces derniers, qui doivent aussi être lus et contrôlés directement. Ces vérifications ne remplacent ni les tests applicatifs futurs ni un contrôle distant GitHub Actions.
+Pour reproduire les contrôles documentaires, vérifier les dix sections du statut, les décisions ADR-001 à ADR-013 et leurs champs, ainsi que les cibles des liens relatifs ; relire les deux fichiers pour exclure les données sensibles et rechercher les motifs courants de jetons ou clés privées sans afficher leurs valeurs. Rejouer localement le bloc `run` du workflow existant avec Bash. Examiner `git diff --check`, l’état Git et la liste des fichiers non suivis : `git diff` seul n’inclut pas ces derniers, qui doivent aussi être lus et contrôlés directement. Ces vérifications ne remplacent ni les tests applicatifs futurs ni un contrôle distant GitHub Actions.
 
 Préserver l’historique utile sans copier les conversations. Ne jamais conserver de secrets, jetons, mots de passe ou sorties sensibles. Après un commit ou une PR autorisés, consigner leur référence lors de la prochaine mise à jour ; ne pas inventer le hash du commit contenant ce fichier. La section 8 doit toujours permettre une reprise immédiate et refléter les autorisations encore nécessaires.

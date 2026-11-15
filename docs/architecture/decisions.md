@@ -112,6 +112,15 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Justification** : concentrer la validation sur déplacement, collision, saut et ergonomie tactile.
 - **Conséquences** : terrain libre sans sortie ni condition de victoire pour cet incrément ; la vision quotidienne reste un objectif futur. Aucune décision de monétisation ou de distribution App Store/Google Play.
 
+## ADR-013 — Prévisualisation privée persistante
+
+- **Date** : 2026-11-15.
+- **Statut** : objectif validé par l’utilisateur ; service local installé, activation au démarrage et accès HTTPS bloqués par les droits administratifs.
+- **Contexte** : tester le prototype depuis un iPhone via Tailscale et Homepage, piloté par l’agent sans commandes manuelles.
+- **Décision** : service systemd utilisateur non privilégié, serveur statique Python standard sur loopback, releases identifiées par SHA et lien `current` atomique ; proxy Tailscale Serve privé persistant dédié à 8443, sans modifier 443 ni activer Funnel. Configuration Homepage privée hors Git.
+- **Justification** : réutiliser Python, systemd et Tailscale existants, sans infrastructure publique ni serveur Vite permanent.
+- **Conséquences** : le linger utilisateur nécessite une autorisation système ciblée ; pas de sudoers général. Logs dans le journal utilisateur. La prévisualisation PR reste distincte d’une future version stable ; l’automatisation de main n’est qu’une proposition dans `ops/README.md`, sans timer activé.
+
 ## Orientations et choix encore à confirmer
 
 - Architecture au-delà du prototype statique, hébergement et distribution iOS/Android.
