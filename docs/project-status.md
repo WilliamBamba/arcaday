@@ -17,7 +17,6 @@ Tu es l’architecte technique accompagnant le développement d’Arcaday. Le pr
 - Ne jamais désactiver les mécanismes de sécurité pour simplifier une opération ; conserver le sandbox et utiliser les autorisations natives.
 - Préserver et signaler les modifications non committées. Ne jamais développer directement sur `main`.
 - Ne jamais fusionner dans `main` sans autorisation explicite ; tout déploiement requiert également une approbation humaine.
-- Pour cette mise à jour : branche `codex/document-harness-results`, seul `docs/project-status.md` modifié. Commit, publication et ouverture de PR sont autorisés par l’utilisateur ; aucune fusion autorisée. À la reprise, vérifier ce qui a déjà été exécuté avant de recommencer une opération.
 
 ChatGPT accompagne les décisions et formule les actions ; Codex exécute les opérations autorisées dans le dépôt et en rapporte les résultats. Si l’assistant dispose lui-même des outils nécessaires, il peut les utiliser dans ce périmètre. Sans accès au dépôt, fournir une seule instruction à transmettre à Codex, puis demander son résultat avant de continuer ; ne jamais prétendre avoir vérifié le serveur depuis ce seul document.
 
@@ -100,7 +99,7 @@ Les PR #1 (fondations) et #2 (CI) précèdent la PR #3. Celle-ci est la premièr
 - PR #4 intégrée à `81a9b13`, puis PR #5 à `a257311` : synchronisations locales vérifiées. Les anciennes branches locales sont conservées.
 - Test autonome réussi : push de `test/codex-pr-workflow` via le credential helper puis création de la **PR #6** via `gh` avec jeton temporaire. Commit de test : `c20d148715a5711b7ff2f331b40342df167c7ced`. Auteur PR vérifié : `app/arcaday-codex-bot` ; l’acteur du push n’a pas été identifié indépendamment dans les événements disponibles.
 - PR #6 fermée **sans fusion** ; événement de fermeture attribué à `arcaday-codex-bot[bot]`. Seule sa branche distante a été supprimée, absence vérifiée ; branche locale conservée. Retour sur `main` alignée et propre vérifié. Le fichier de test n’a pas été intégré à `main`.
-- Branche de cette actualisation : `codex/document-harness-results`. Consulter Git et la PR avant de déduire son état de publication ; ne pas anticiper son hash ou son numéro de PR dans ce fichier.
+- Cette actualisation a été proposée dans la PR #7, depuis `codex/document-harness-results`. Vérifier son état sur GitHub à la reprise ; cette référence historique ne vaut pas instruction de recréer une branche ou une PR.
 - Documentation, registre des décisions et CI documentaire présents. Aucun jeu, moteur, backend, stockage ou test applicatif implémenté dans le dépôt.
 
 ### Rapporté par l’utilisateur — protections, CI et revues
@@ -134,7 +133,7 @@ Aucun framework ni moteur n’est encore choisi. Le workflow GitHub App validé 
 
 - **Priorité** : préparer le cadrage de Daily Impossible, pas recommencer le test GitHub App terminé.
 - **Action à proposer** : définir le périmètre du prototype, les commandes tactiles, la boucle de jeu, les critères de réussite et une proposition de stack minimale ; faire valider les choix significatifs avant développement. Le niveau quotidien reste un objectif produit à préciser, pas une fonctionnalité existante.
-- **Mission documentaire actuelle** : vérifier cette mémoire, créer son commit, publier la branche et ouvrir une PR via l’App ; ces actions sont autorisées, la fusion ne l’est pas. À la reprise, consulter Git et la PR pour éviter les doublons.
+- **À la reprise** : vérifier l’état du dépôt et des travaux déjà intégrés avant de proposer le cadrage. Ne pas recréer les commits ou PR documentaires existants ; les autorisations d’une mission passée ne s’étendent pas aux nouvelles opérations.
 - **Méthode** : lire `AGENTS.md`, vérifier branche et état Git, préserver les changements non committés, travailler sur branche dédiée et présenter les validations. Utiliser le helper existant pour Git et un jeton temporaire pour `gh`, jamais de secret dans les documents ou sorties.
 - **Sécurité** : une approbation GitHub, des contrôles verts ou les droits d’écriture de l’App ne dispensent jamais d’obtenir l’autorisation explicite de fusion. Garder le sandbox et ses autorisations natives. Ne pas réouvrir ni fusionner la PR #6 de test.
 
