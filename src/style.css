@@ -1,0 +1,19 @@
+:root { font-family: system-ui, sans-serif; color: #201e1a; background: #eee3cb; }
+* { box-sizing: border-box; }
+body { margin: 0; overscroll-behavior: none; }
+main { height: 100svh; height: 100dvh; max-width: 480px; margin: auto; display: flex; flex-direction: column; padding: max(8px, env(safe-area-inset-top)) 12px max(8px, env(safe-area-inset-bottom)); gap: 8px; }
+header { text-align: center; }
+h1 { margin: 0; font-size: 22px; }
+p { margin: 4px 0; font-size: 12px; }
+#game { flex: 1; min-height: 0; overflow: hidden; }
+canvas { display: block; }
+nav { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 12px; }
+button { min-height: 64px; border: 2px solid #201e1a; border-radius: 6px; background: transparent; color: inherit; font: bold 22px system-ui; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+button[data-held="true"] { background: #201e1a; color: #eee3cb; }
+button:focus-visible { outline: 3px solid #201e1a; outline-offset: 2px; }
+.hint { text-align: center; font-size: 11px; }
+@media (max-height: 450px) { header p, .hint { display: none; } button { min-height: 48px; } }
+
+/* Keep long-press suppression local to the controls, including their gaps. */
+.touch-controls { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+@media (hover: none) and (pointer: coarse) { .hint { display: none; } }

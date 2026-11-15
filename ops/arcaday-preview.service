@@ -1,0 +1,16 @@
+[Unit]
+Description=Arcaday private prototype static preview
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.local/lib/arcaday/serve-static.py %h/.local/share/arcaday-preview/current --port 4173
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
