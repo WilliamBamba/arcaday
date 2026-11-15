@@ -13,3 +13,7 @@ button[data-held="true"] { background: #201e1a; color: #eee3cb; }
 button:focus-visible { outline: 3px solid #201e1a; outline-offset: 2px; }
 .hint { text-align: center; font-size: 11px; }
 @media (max-height: 450px) { header p, .hint { display: none; } button { min-height: 48px; } }
+
+/* Keep long-press suppression local to the controls, including their gaps. */
+.touch-controls { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+@media (hover: none) and (pointer: coarse) { .hint { display: none; } }

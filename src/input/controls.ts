@@ -47,8 +47,9 @@ export function bindControls(controls: Controls): () => void {
     for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
       button.addEventListener(type, event => { controls.release(`pointer:${event.pointerId}`); paint(); }, options);
     }
-    button.addEventListener('contextmenu', event => event.preventDefault(), options);
+
   });
+  document.querySelector('.touch-controls')?.addEventListener('contextmenu', event => event.preventDefault(), options);
   window.addEventListener('keydown', event => {
     const action = keys[event.code];
     if (!action) return;

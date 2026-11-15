@@ -80,3 +80,25 @@ test('simultaneous touch, cancellation, blur and small portrait layout', async (
   }
   await page.screenshot({ path: 'test-results/prototype-portrait.png' });
 });
+
+
+test('touch controls hide keyboard help and scope long-press protection', async ({ page, browser }) => {
+  await expect(page.getByRole('button', { name: 'Sauter' })).toHaveText('↑');
+  await expect(page.locator('.hint')).toBeHidden();
+  const controls = page.getByRole('navigation', { name: 'Commandes du jeu' });
+  await expect(controls).toHaveCSS('user-select', 'none');
+  const canceled = await page.evaluate(() => {
+    const fire = (selector: string) => !document.querySelector(selector)!.dispatchEvent(
+      new MouseEvent('contextmenu', { bubbles: true, cancelable: true }),
+    );
+    return { controls: fire('.touch-controls'), jump: fire('[data-action="jump"]'), header: fire('header') };
+  });
+  expect(canceled).toEqual({ controls: true, jump: true, header: false });
+  expect(await page.locator('header').evaluate(el => getComputedStyle(el).userSelect)).not.toBe('none');
+  const desktop = await browser.newContext({ viewport: { width: 1280, height: 800 }, hasTouch: false });
+  try {
+    const desktopPage = await desktop.newPage();
+    await desktopPage.goto('/');
+    await expect(desktopPage.locator('.hint')).toBeVisible();
+  } finally { await desktop.close(); }
+});
