@@ -1,6 +1,6 @@
 # Arcaday — mémoire du projet
 
-Dernière synchronisation de la mémoire : **15 novembre 2026 (Europe/Paris)**, pendant la préparation du test de revue automatique GitHub, après fusion de la PR #4 et synchronisation locale de `main`. Ce document constitue le point d’entrée autonome pour reprendre le projet sans les conversations précédentes. Commencer par la section 8 ; cet instantané ne remplace pas le dépôt vivant. La présente mise à jour est préparée sans commit sur une branche dédiée.
+Dernière synchronisation de la mémoire : **15 novembre 2026 (Europe/Paris)**, après validation du workflow GitHub App avec la PR #6 et son nettoyage. Ce document permet une reprise autonome ; commencer par la section 8 puis vérifier Git, car cet instantané ne remplace pas le dépôt vivant.
 
 Les mentions **Vérifié** désignent une observation du dépôt ou de l’environnement ; **Rapporté** désigne les informations fournies par l’utilisateur ; **À confirmer** désigne une information non établie. Une intention produit n’est pas une fonctionnalité opérationnelle.
 
@@ -17,7 +17,7 @@ Tu es l’architecte technique accompagnant le développement d’Arcaday. Le pr
 - Ne jamais désactiver les mécanismes de sécurité pour simplifier une opération ; conserver le sandbox et utiliser les autorisations natives.
 - Préserver et signaler les modifications non committées. Ne jamais développer directement sur `main`.
 - Ne jamais fusionner dans `main` sans autorisation explicite ; tout déploiement requiert également une approbation humaine.
-- Pour cette mise à jour : branche `docs/update-harness-status`, créée depuis `main` synchronisée ; seul `docs/project-status.md` peut être modifié. Aucun commit, publication, création de PR ou fusion autorisé. Attendre l’autorisation de l’utilisateur avant le commit.
+- Pour cette mise à jour : branche `codex/document-harness-results`, seul `docs/project-status.md` modifié. Commit, publication et ouverture de PR sont autorisés par l’utilisateur ; aucune fusion autorisée. À la reprise, vérifier ce qui a déjà été exécuté avant de recommencer une opération.
 
 ChatGPT accompagne les décisions et formule les actions ; Codex exécute les opérations autorisées dans le dépôt et en rapporte les résultats. Si l’assistant dispose lui-même des outils nécessaires, il peut les utiliser dans ce périmètre. Sans accès au dépôt, fournir une seule instruction à transmettre à Codex, puis demander son résultat avant de continuer ; ne jamais prétendre avoir vérifié le serveur depuis ce seul document.
 
@@ -42,7 +42,7 @@ La collection quotidienne, les deux jeux et les plateformes sont décrits dans `
 
 Construire progressivement un environnement de Harness Engineering reposant sur Codex CLI, Git et GitHub, les tests automatisés, la CI/CD, la revue de code, des agents spécialisés et des déploiements contrôlés. Privilégier les fonctionnalités natives plutôt qu’un orchestrateur personnalisé.
 
-Cette ambition est validée comme direction par l’utilisateur. Elle ne décrit pas un système déjà complet : seuls le dépôt, ses règles, sa documentation et la configuration d’une CI documentaire sont actuellement vérifiés.
+Cette ambition est validée comme direction par l’utilisateur. Elle ne décrit pas un système déjà complet : le dépôt, la documentation et le workflow de publication/création de PR via GitHub App sont opérationnels ; l’application et le déclenchement automatique des revues restent à développer ou confirmer.
 
 ## 4. Environnement technique
 
@@ -53,7 +53,7 @@ Cette ambition est validée comme direction par l’utilisateur. Elle ne décrit
 | Utilisateur Linux dédié | `arcaday`, vérifié par `whoami` dans cette conversation ; UID/GID 1001 et groupes issus de l’inspection initiale |
 | Accès au projet | Connexion SSH dédiée `hetzner-arcaday`, indiquée par l’utilisateur ; répertoire vérifié dans cette conversation |
 | Codex Desktop | Testé avec succès : inspection, fetch et synchronisation Git avec autorisations natives |
-| Autres utilisateurs concernés | À confirmer ; aucun rôle d’administration supplémentaire établi |
+| Autres utilisateurs concernés | `william`, administrateur selon l’utilisateur ; génération des jetons via une commande sudo dédiée testée |
 | Dépôt GitHub configuré | `WilliamBamba/arcaday` |
 | Remote `origin` | `https://github.com/WilliamBamba/arcaday.git` pour lecture et publication |
 | Codex CLI | `0.153.4`, disponible et vérifié dans cette conversation |
@@ -68,9 +68,11 @@ Structure initiale avant la création de la mémoire : `README.md`, `AGENTS.md`,
 
 Les versions de Git, GitHub CLI, Node.js, npm et Python ci-dessus proviennent de l’inspection initiale du 8 novembre et n’ont pas été revérifiées pendant cette mise à jour.
 
-**Séparation des accès** : la connexion SSH au serveur, l’identité d’auteur Git et l’authentification GitHub sont distinctes. Le remote utilise HTTPS. La synchronisation précédente a réussi avec `GIT_TERMINAL_PROMPT=0`, `GIT_ASKPASS=/bin/false` et `git -c credential.helper= fetch` : aucun jeton fourni ni authentification interactive demandée. Cela ne prouve pas que Codex dispose d’un accès de publication. Les écritures dans `.git` ont nécessité les autorisations natives du sandbox pour le fetch, le changement de branche et l’avance rapide ; la création de la branche actuelle a également réussi après autorisation native. Ne pas désactiver le sandbox ni copier de secrets ; arrêter et signaler toute authentification nécessaire.
+**GitHub App opérationnelle** : `arcaday-codex-bot`. Git push utilise le credential helper configuré ; les commandes `gh` utilisent un jeton temporaire généré par `sudo -n -u william /usr/local/libexec/arcaday/github-token`, uniquement dans `GH_TOKEN` pour la durée de l’opération. Ce chemin désigne le générateur, pas une clé. Ne jamais afficher ni enregistrer le jeton, activer le traçage shell ou copier une clé privée.
 
-**À confirmer indépendamment** : protections de branche, mécanisme de publication antérieur, authentification durable de GitHub et éventuels services hors dépôt. Le succès GitHub Actions reste une information rapportée par l’utilisateur ; seul le hash distant de `main` a été contrôlé pendant cette mise à jour, sans vérifier les réglages GitHub ni les résultats de CI.
+**Séparation des accès** : SSH au VPS, identité d’auteur des commits et identité GitHub sont distincts. Selon l’utilisateur, la clé privée de l’App est protégée et directement inaccessible à l’utilisateur Linux `arcaday` ; ses permissions n’ont pas été auditées dans cette mission et son contenu n’a pas été lu. Les jetons temporaires sont utilisables par les processus autorisés sous `arcaday` : protection de la clé ne signifie pas absence de droits GitHub pour l’agent. Le sandbox et ses autorisations natives restent en place.
+
+**Point de sécurité** : les jetons d’installation disposent de droits d’écriture. Une approbation de PR et une CI réussie ne constituent jamais une instruction de fusion pour Codex : toute fusion, même techniquement possible après approbation, nécessite une autorisation humaine explicite. Ne pas activer de fusion automatique. Les déploiements exigent aussi une validation humaine.
 
 ## 5. Historique des étapes validées
 
@@ -92,62 +94,49 @@ Les PR #1 (fondations) et #2 (CI) précèdent la PR #3. Celle-ci est la premièr
 
 ## 6. État actuel
 
-### Vérifié localement
+### Vérifié dans le dépôt et les opérations de cette conversation
 
-- `main` et la référence locale `origin/main` pointent sur **`81a9b135d20009826f05ea09173c79d0930a0f4a`**, message `docs: update project status after first merge`. Le 15 novembre 2026, `git ls-remote` a confirmé le même hash sur GitHub, sans authentification interactive. L’arbre était propre avant la création de la branche de travail.
-- Selon l’historique de cette conversation, la PR #4 a été fusionnée avec Squash and Merge, puis `main` a avancé de `1594d78` vers `81a9b13` avec `git merge --ff-only origin/main`. La synchronisation a été vérifiée avec un arbre propre ; la fusion de la PR elle-même est rapportée par l’utilisateur.
-- Les anciennes branches documentaires sont conservées. Le commit `16f53a7` de `docs/update-project-status-after-first-merge` a fourni la mise à jour intégrée dans `81a9b13`. Les commits d’origine d’une PR squashée ne doivent pas être recréés ni refusionnés.
-- Branche de cette mission : **`docs/update-harness-status`**, créée depuis `main` vérifiée à jour. Seul `docs/project-status.md` est modifié ; aucun commit, push, création de PR ou fusion n’est autorisé. À la reprise, vérifier Git avant de déterminer si cet instantané a depuis été committé.
-- `README.md`, `AGENTS.md`, `docs/vision.md`, `docs/project-status.md` et `docs/architecture/decisions.md` sont présents. Les règles de maintenance sont intégrées dans `AGENTS.md`.
-- Aucun code applicatif ni test applicatif n’est présent dans les fichiers suivis. Jeux, défis quotidiens, classements, séries, partage et Web/PWA restent à développer ; l’implémentation iOS/Android reste à décider.
+- Base de travail : `main` et `origin/main` à **`a257311f19ea49b73f33f6517183598691ed2a5a`**, après la PR #5 squashée selon l’utilisateur. Hash distant confirmé par `git ls-remote` avant cette mission ; arbre initial propre.
+- PR #4 intégrée à `81a9b13`, puis PR #5 à `a257311` : synchronisations locales vérifiées. Les anciennes branches locales sont conservées.
+- Test autonome réussi : push de `test/codex-pr-workflow` via le credential helper puis création de la **PR #6** via `gh` avec jeton temporaire. Commit de test : `c20d148715a5711b7ff2f331b40342df167c7ced`. Auteur PR vérifié : `app/arcaday-codex-bot` ; l’acteur du push n’a pas été identifié indépendamment dans les événements disponibles.
+- PR #6 fermée **sans fusion** ; événement de fermeture attribué à `arcaday-codex-bot[bot]`. Seule sa branche distante a été supprimée, absence vérifiée ; branche locale conservée. Retour sur `main` alignée et propre vérifié. Le fichier de test n’a pas été intégré à `main`.
+- Branche de cette actualisation : `codex/document-harness-results`. Consulter Git et la PR avant de déduire son état de publication ; ne pas anticiper son hash ou son numéro de PR dans ce fichier.
+- Documentation, registre des décisions et CI documentaire présents. Aucun jeu, moteur, backend, stockage ou test applicatif implémenté dans le dépôt.
 
-### Rapporté par l’utilisateur — GitHub distant
+### Rapporté par l’utilisateur — protections, CI et revues
 
-- PR **#3 fusionnée avec Squash and Merge** ; le commit récupéré et l’égalité des contenus corroborent localement cette intégration. L’état de la PR via l’API n’a pas été interrogé.
-- GitHub Actions validé : résultat précédemment rapporté **Validate project instructions : SUCCESS**. Cette preuve historique ne permet pas d’affirmer le résultat d’une exécution sur le commit squash ou sur la présente mise à jour.
-
-- **Ruleset `Protect main` configuré**, selon l’utilisateur : PR obligatoire, squash uniquement, contrôle CI **Validate project instructions** obligatoire, branche à jour avant fusion, suppression et force-push interdits. Configuration et application effective non vérifiées indépendamment dans cette mission.
-- **Codex Code Review activé**, selon l’utilisateur : toutes les PR, à chaque push, avec revue exhaustive. Ce réglage rapporté ne prouve pas encore le déclenchement ni la réussite d’une revue réelle ; le test documentaire est la prochaine étape.
+- **GitHub Actions fonctionnelles** : CI de la PR #6 passée selon l’utilisateur ; workflow local et validations documentaires vérifiés. Aucun résultat distant de CI n’a été réinterrogé pour cette consignation.
+- **Protection de `main`** : PR et une approbation obligatoires, révocation des approbations après nouveau commit, Squash and Merge. Le ruleset `Protect main` a aussi été rapporté avec le contrôle **Validate project instructions** obligatoire, branche à jour avant fusion, suppression et force-push interdits. Réglages non audités indépendamment ici.
+- **Codex Code Review manuel validé sur la PR #5**, selon l’utilisateur. L’activation pour toutes les PR et à chaque push avait été rapportée ; le **déclenchement automatique reste à confirmer**. Ne pas assimiler revue manuelle réussie et automatisation vérifiée.
 
 ### État de l’automatisation
 
-**Fonctionnel**, avec un périmètre de preuve explicite :
+**Validé dans ce workflow** : création de branches, modifications, commits, contrôles documentaires locaux, synchronisation Git et publication avec autorisations natives ; création et fermeture de PR avec l’identité de l’App. La PR #6 valide la publication et la création de PR autonomes depuis Codex Desktop dans le périmètre autorisé, sans identifiants personnels de William affichés.
 
-- Création de branches et modification de fichiers par Codex : constatées dans cette session.
-- Commits : présents et vérifiés dans l’historique, réalisation antérieure par Codex rapportée ; aucun nouveau commit créé pendant cette mission.
-- Revue locale et validations documentaires : réalisées lors des missions précédentes et consignées dans la mémoire ; contrôles documentaires à rejouer pour chaque changement pertinent.
-- Synchronisation Git avec autorisations natives : fetch, changement de branche et avance rapide réussis dans Codex Desktop.
-- CI GitHub Actions : workflow présent, succès distant rapporté par l’utilisateur.
+**À confirmer ou développer** : déclenchement automatique de Codex Code Review, tests applicatifs, déploiement. Les fusions restent sous contrôle humain explicite ; la permission d’écriture d’un jeton ne vaut pas autorisation d’intégration.
 
-**Pas encore automatisé de bout en bout** : publication des branches et création de Pull Requests directement depuis Codex Desktop, fusion contrôlée et déploiement. La revue automatique GitHub est désormais configurée selon l’utilisateur, mais son fonctionnement sur une vraie PR reste à tester. La fusion manuelle de la PR #3 ne valide pas une automatisation de la fusion. Aucun mécanisme supplémentaire d’exécution automatique n’a été installé par la maintenance documentaire.
+### Limites et continuité
 
-### À confirmer et limites
-
-- La priorité immédiate est le test d’une vraie revue automatique sur une PR documentaire. Le test de reprise ChatGPT figurait dans la roadmap précédente ; son résultat n’est pas vérifié indépendamment ici et n’est pas déduit du seul message du commit squash.
-- L’authentification GitHub de Codex pour les opérations de publication reste à établir ; un ancien échec de `gh pr list` demandant une authentification ne contredit pas le fetch HTTPS réussi sans gestionnaire d’identifiants.
-- `codex --version` a affiché sa version avec un avertissement concernant la création impossible d’alias PATH sur un système de fichiers en lecture seule. Les opérations Git autorisées ont néanmoins réussi ; aucune sécurité n’a été désactivée.
-- Aucun bug applicatif évalué, puisqu’aucune application n’est présente.
+- Protection de la clé privée et réglages GitHub rapportés, non réaudités ici ; aucune garantie nouvelle sur leur isolation n’est déduite du seul succès du test.
+- Le test de reprise ChatGPT figurait dans une roadmap antérieure ; son résultat n’est pas vérifié indépendamment ici. La nouvelle priorité utilisateur est **Daily Impossible**.
+- Le registre architectural conserve ses observations initiales sur l’authentification ; le présent statut décrit les résultats opérationnels plus récents. Une mise à jour ciblée des ADR-002/006 pourra être proposée séparément pour formaliser le mécanisme retenu, sans présumer que le service de publication isolé envisagé lors de l’audit a été implémenté.
 
 ## 7. Roadmap
 
-Ces actions restent à réaliser ou à valider, dans cet ordre :
+1. **Daily Impossible : prochaine priorité de développement.** Cadrer un premier prototype jouable de plateforme 2D, mobile-first et portrait-first, avec une sortie à atteindre ; proposer une architecture minimale et des critères de validation avant l’implémentation.
+2. Après validation du cadrage, développer le prototype sur une branche dédiée avec tests adaptés au gameplay et aux performances mobiles.
+3. Confirmer le déclenchement automatique de Codex Code Review sur une prochaine PR autorisée, sans bloquer le cadrage du jeu ni confondre revue et CI.
+4. Étendre progressivement les tests et les déploiements contrôlés ; Daily Crime reste une étape ultérieure.
 
-1. Tester une vraie revue automatique Codex sur une PR documentaire, après validation de cette modification et autorisation des opérations GitHub nécessaires.
-2. Après observation du résultat de la revue, poursuivre le Harness Engineering : définir puis automatiser progressivement le workflow GitHub sécurisé (publication, PR, revue et fusion contrôlée), avec le minimum de privilèges et les validations humaines requises.
-3. Définir l’architecture applicative et consigner les choix approuvés dans le registre.
-4. Développer le prototype Daily Impossible.
-5. Ajouter progressivement les agents de test et de revue, les tests adaptés et les déploiements contrôlés.
-
-Aucun framework, moteur ou orchestrateur personnalisé n’est choisi. Le commit de la présente mémoire attend une autorisation séparée ; il ne faut pas confondre sa finalisation avec une nouvelle exécution des étapes de la PR #3.
+Aucun framework ni moteur n’est encore choisi. Le workflow GitHub App validé peut être réutilisé dans les limites de chaque mission ; aucune fusion ou livraison automatique n’est autorisée.
 
 ## 8. Prochaine action exacte — point de reprise
 
-- **Priorité immédiate** : tester une vraie revue automatique Codex sur une PR documentaire. La fusion de la PR #4 et la synchronisation historique à `81a9b13` sont déjà terminées ; ne pas les recommencer.
-- **Action immédiate dans cette mission** : présenter le diff et les contrôles de `docs/project-status.md` sur `docs/update-harness-status`, puis attendre la validation de l’utilisateur. Aucun commit, push, création de PR ou fusion autorisé.
-- **Test ultérieur, après autorisation** : committer et publier la modification validée, ouvrir une PR documentaire vers `main`, puis observer la revue Codex et le contrôle CI sur le hash publié. Un push ultérieur autorisé permettra de vérifier le déclenchement à chaque push. Ne pas déclarer la revue réussie sur la seule base du réglage rapporté, ni confondre la revue Codex avec GitHub Actions.
-- **Critères de validation du test** : identifier la PR, le commit examiné et la réponse de Codex ; distinguer absence de remarque, remarques à traiter, absence de déclenchement et échec. Consigner les résultats effectivement observés, sans garantir l’exhaustivité de détection des défauts. Vérifier séparément la CI ; aucune fusion automatique n’est autorisée.
-- **Si accès au dépôt** : lire `AGENTS.md`, examiner `git status --short --branch`, `git log -1 --oneline` et le diff. Préserver les modifications non committées et ne pas recréer les commits existants. Sans accès, présenter ce document comme un instantané ; les réglages `Protect main` et Codex Code Review restent des informations rapportées tant qu’ils ne sont pas vérifiés.
-- **Suite** : automatiser la publication des branches et la création de PR directement depuis Codex Desktop, avec séparation des identifiants et maintien du sandbox. L’architecture GitHub App avec service isolé proposée lors de l’audit de phase 14 reste une recommandation non adoptée et non implémentée. Fusions et déploiements exigent toujours une validation humaine.
+- **Priorité** : préparer le cadrage de Daily Impossible, pas recommencer le test GitHub App terminé.
+- **Action à proposer** : définir le périmètre du prototype, les commandes tactiles, la boucle de jeu, les critères de réussite et une proposition de stack minimale ; faire valider les choix significatifs avant développement. Le niveau quotidien reste un objectif produit à préciser, pas une fonctionnalité existante.
+- **Mission documentaire actuelle** : vérifier cette mémoire, créer son commit, publier la branche et ouvrir une PR via l’App ; ces actions sont autorisées, la fusion ne l’est pas. À la reprise, consulter Git et la PR pour éviter les doublons.
+- **Méthode** : lire `AGENTS.md`, vérifier branche et état Git, préserver les changements non committés, travailler sur branche dédiée et présenter les validations. Utiliser le helper existant pour Git et un jeton temporaire pour `gh`, jamais de secret dans les documents ou sorties.
+- **Sécurité** : une approbation GitHub, des contrôles verts ou les droits d’écriture de l’App ne dispensent jamais d’obtenir l’autorisation explicite de fusion. Garder le sandbox et ses autorisations natives. Ne pas réouvrir ni fusionner la PR #6 de test.
 
 ## 9. Journal de progression
 
@@ -170,6 +159,10 @@ Aucun framework, moteur ou orchestrateur personnalisé n’est choisi. Le commit
 | 2026-11-09 (Europe/Paris) | Actualisation de la mémoire après fusion | Branche dédiée créée ; seul le statut actualisé ; commit en attente d’autorisation ; test en nouvelle conversation à réaliser | Base `1594d78` |
 | 2026-11-09 (Europe/Paris) | Commit de la mémoire puis fusion PR #4 et synchronisation | Commit local vérifié, fusion squash rapportée ; avance rapide de main vérifiée avec arbre propre | `16f53a7` → squash `81a9b13` |
 | 2026-11-15 (Europe/Paris) | Préparation du test de revue automatique | Main locale et distante vérifiées à `81a9b13` ; branche dédiée créée ; règles Protect main et Code Review rapportées par l’utilisateur ; test réel à effectuer | `docs/update-harness-status`, aucun commit |
+| 2026-11-15 (Europe/Paris) | PR #5 et synchronisation | Fusion squash rapportée ; main synchronisée et propre vérifiée ; revue Codex manuelle validée selon l’utilisateur | `a257311` |
+| 2026-11-15 (Europe/Paris) | Test GitHub App | Push et création autonome de PR vérifiés ; auteur App confirmé ; succès CI rapporté | PR #6, `c20d148` |
+| 2026-11-15 (Europe/Paris) | Nettoyage du test | PR #6 fermée sans fusion par le bot, branche distante supprimée ; branche locale conservée | Retour sur main à `a257311` |
+| 2026-11-15 (Europe/Paris) | Actualisation des résultats du Harness Engineering | Protections et limites consignées ; Daily Impossible devient la priorité de développement | `codex/document-harness-results` |
 
 ## 10. Protocole de mise à jour
 
