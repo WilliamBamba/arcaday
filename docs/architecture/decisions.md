@@ -85,9 +85,36 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Justification** : permettre l’ajout de jeux tout en maintenant une expérience cohérente et des composants réutilisables.
 - **Conséquences** : définir les frontières entre jeux et services communs avant l’implémentation. Aucune décision prise sur monorepo, moteur, backend, stockage, calcul des défis ou classements.
 
+## ADR-010 — Premier prototype Daily Impossible statique
+
+- **Date** : 2026-11-15.
+- **Statut** : validée explicitement par l’utilisateur pour le premier incrément.
+- **Contexte** : tester le plaisir de déplacement avant les services quotidiens et les finitions.
+- **Décision** : TypeScript strict, Vite, Phaser 3 et Arcade Physics ; application Web statique, sans backend ni framework UI. Sources séparées entre scène, mouvement et commandes ; dépendances verrouillées par npm.
+- **Justification** : moteur adapté aux collisions 2D et structure minimale, sans infrastructure supplémentaire.
+- **Conséquences** : build dans `dist/`, Node pour le développement uniquement. Vitest teste les règles pures et Playwright les interactions dans Chromium ; les commandes locales vérifient types, tests et build. Leur ajout à la CI est différé : l’App existante ne possède pas la permission `workflows` ; contrôle documentaire conservé. PWA, distribution native et hébergement restent ultérieurs. Ce choix précise ADR-008/009 pour ce seul prototype.
+
+## ADR-011 — Commandes portrait et saut variable
+
+- **Date** : 2026-11-15.
+- **Statut** : exigences validées par l’utilisateur ; modalités techniques retenues dans le périmètre de l’implémentation.
+- **Contexte** : jouer sur mobile avec déplacement et saut simultanés.
+- **Décision** : terrain logique 360 × 550 ajusté sans déformation, boutons HTML gauche/droite/saut en bas avec Pointer Events et capture par doigt. Clavier de développement parallèle. Impulsion au sol, gravité Arcade, vitesse ascendante limitée au relâchement pour le saut variable.
+- **Justification** : commandes indépendantes de la résolution du canvas, multitouch explicite et règles de mouvement testables sans moteur.
+- **Conséquences** : les sources clavier/tactile sont indépendantes ; directions opposées neutres, pas de double saut ni rebond automatique. Annulation, perte de capture, focus ou visibilité libèrent les entrées. Plateformes solides sur toutes les faces ; réglages à valider sur smartphone réel.
+
+## ADR-012 — Priorité au gameplay et graphisme provisoire
+
+- **Date** : 2026-11-15.
+- **Statut** : validée explicitement par l’utilisateur.
+- **Contexte** : premier incrément jouable, pas une version de distribution.
+- **Décision** : sol, quatre plateformes, silhouette géométrique ; palette beige/noir provisoire. Aucun asset externe. Reporter quotidien, backend, classements, obstacles complexes et décorations détaillées.
+- **Justification** : concentrer la validation sur déplacement, collision, saut et ergonomie tactile.
+- **Conséquences** : terrain libre sans sortie ni condition de victoire pour cet incrément ; la vision quotidienne reste un objectif futur. Aucune décision de monétisation ou de distribution App Store/Google Play.
+
 ## Orientations et choix encore à confirmer
 
-- Architecture applicative concrète, stack, hébergement et distribution iOS/Android.
+- Architecture au-delà du prototype statique, hébergement et distribution iOS/Android.
 - Mécanisme sécurisé d’authentification GitHub pour Codex et protections de branche.
 - Organisation des agents de test et de revue, couverture de tests et futurs contrôles de livraison.
 - Détails des classements, séries et partage, ainsi que les règles calendaires des défis quotidiens.
