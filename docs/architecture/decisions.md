@@ -20,7 +20,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Contexte** : besoin de versionner, revoir et intégrer les changements.
 - **Décision** : utiliser Git et le dépôt GitHub `WilliamBamba/arcaday`, avec intégration par Pull Request.
 - **Justification** : conserver un historique traçable et utiliser la revue et les contrôles natifs.
-- **Conséquences** : vérifier les PR et leurs contrôles avant intégration. L’authentification de `gh` et les protections distantes restent à confirmer.
+- **Conséquences** : vérifier les PR et leurs contrôles avant intégration. Le workflow GitHub App a depuis été vérifié (voir mémoire du projet) ; les protections distantes restent à auditer indépendamment.
 
 ## ADR-003 — Branches dédiées
 
@@ -56,7 +56,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Contexte** : les opérations GitHub peuvent nécessiter une authentification.
 - **Décision** : ne jamais committer de secrets ni les exposer dans les documents ou les sorties destinées aux agents ; limiter les accès au strict nécessaire.
 - **Justification** : éviter la divulgation de moyens d’accès et de données sensibles.
-- **Conséquences** : étudier une authentification adaptée sans copier de jeton dans la mémoire. Le mécanisme concret de gestion des identifiants reste à définir ; aucun coffre ou dispositif particulier n’est déclaré installé.
+- **Conséquences** : conserver une authentification adaptée sans copier de jeton dans la mémoire. Le workflow utilise désormais le helper Git existant et un jeton temporaire de l’App pour `gh`, sans stockage dans le dépôt. L’isolation de la clé privée est rapportée, non auditée ; aucun service de publication isolé supplémentaire n’est déclaré installé.
 
 ## ADR-007 — Préférence pour les capacités natives
 
@@ -74,7 +74,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Contexte** : parties courtes et commandes adaptées au mobile.
 - **Décision** : cibler d’abord une application Web/PWA conçue pour le mobile et le portrait ; envisager ensuite iOS et Android.
 - **Justification** : concentrer le premier développement sur une expérience mobile lisible et performante.
-- **Conséquences** : évaluer ergonomie tactile et performances dans les futurs prototypes. Framework, méthode de distribution mobile et capacités PWA restent à choisir ; les applications ne sont pas encore développées.
+- **Conséquences** : évaluer ergonomie tactile et performances dans les futurs prototypes. Le prototype Web est précisé par ADR-010 ; distribution mobile et capacités PWA installables restent à définir.
 
 ## ADR-009 — Plusieurs jeux quotidiens indépendants
 
@@ -83,12 +83,49 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Contexte** : Daily Impossible et Daily Crime doivent coexister sous la marque NUSINI.
 - **Décision** : concevoir une architecture extensible à plusieurs jeux indépendants, chacun proposant un défi quotidien identique pour tous.
 - **Justification** : permettre l’ajout de jeux tout en maintenant une expérience cohérente et des composants réutilisables.
-- **Conséquences** : définir les frontières entre jeux et services communs avant l’implémentation. Aucune décision prise sur monorepo, moteur, backend, stockage, calcul des défis ou classements.
+- **Conséquences** : définir les frontières entre jeux et services communs avant l’implémentation. ADR-010 choisit le moteur du premier prototype ; monorepo, backend, stockage, calcul des défis et classements restent à définir.
+
+## ADR-010 — Premier prototype Daily Impossible statique
+
+- **Date** : 2026-11-15.
+- **Statut** : validée explicitement par l’utilisateur pour le premier incrément.
+- **Contexte** : tester le plaisir de déplacement avant les services quotidiens et les finitions.
+- **Décision** : TypeScript strict, Vite, Phaser 3 et Arcade Physics ; application Web statique, sans backend ni framework UI. Sources séparées entre scène, mouvement et commandes ; dépendances verrouillées par npm.
+- **Justification** : moteur adapté aux collisions 2D et structure minimale, sans infrastructure supplémentaire.
+- **Conséquences** : build dans `dist/`, Node pour le développement uniquement. Vitest teste les règles pures et Playwright les interactions dans Chromium ; les commandes locales vérifient types, tests et build. La CI applicative a été ajoutée à la PR #8 après le refus initial de publication du workflow par l’App : elle vérifie types, tests, build et Chromium, en conservant le contrôle documentaire. Aucun élargissement des permissions de l’App n’est déduit de cet ajout. PWA, distribution native et hébergement public restent ultérieurs. Ce choix précise ADR-008/009 pour ce seul prototype.
+
+## ADR-011 — Commandes portrait et saut variable
+
+- **Date** : 2026-11-15.
+- **Statut** : exigences validées par l’utilisateur ; modalités techniques retenues dans le périmètre de l’implémentation.
+- **Contexte** : jouer sur mobile avec déplacement et saut simultanés.
+- **Décision** : terrain logique 360 × 550 ajusté sans déformation, boutons HTML gauche/droite/saut en bas avec Pointer Events et capture par doigt. Clavier de développement parallèle. Impulsion au sol, gravité Arcade, vitesse ascendante limitée au relâchement pour le saut variable.
+- **Justification** : commandes indépendantes de la résolution du canvas, multitouch explicite et règles de mouvement testables sans moteur.
+- **Précision validée le 2026-11-16** : le rectangle du bouton initial est vérifié aux coordonnées de chaque pointeur capturé. Sortir désactive, revenir réactive, glisser vers un autre bouton ne le déclenche pas. Les interruptions suppriment l’association. Flèche ↑ accessible comme « Sauter », aide clavier masquée sur tactile et protection des appuis prolongés limitée aux commandes.
+- **Conséquences** : les sources clavier/tactile sont indépendantes ; directions opposées neutres, pas de double saut ni rebond automatique. Annulation, perte de capture, focus ou visibilité libèrent les entrées. Plateformes solides sur toutes les faces. Déplacements, collisions, saut variable et ergonomie validés sur iPhone réel par l’utilisateur le 2026-11-16.
+
+## ADR-012 — Priorité au gameplay et graphisme provisoire
+
+- **Date** : 2026-11-15.
+- **Statut** : validée explicitement par l’utilisateur.
+- **Contexte** : premier incrément jouable, pas une version de distribution.
+- **Décision** : sol, quatre plateformes, silhouette géométrique ; palette beige/noir provisoire. Aucun asset externe. Reporter quotidien, backend, classements, obstacles complexes et décorations détaillées.
+- **Justification** : concentrer la validation sur déplacement, collision, saut et ergonomie tactile.
+- **Conséquences** : terrain libre sans sortie ni condition de victoire pour cet incrément ; la vision quotidienne reste un objectif futur. Aucune décision de monétisation ou de distribution App Store/Google Play.
+
+## ADR-013 — Prévisualisation privée persistante
+
+- **Date** : 2026-11-15.
+- **Statut** : objectif validé par l’utilisateur ; service, linger, HTTPS privé et lien Homepage vérifiés le 2026-11-16 après intervention administrative.
+- **Contexte** : tester le prototype depuis un iPhone via Tailscale et Homepage, piloté par l’agent sans commandes manuelles.
+- **Décision** : service systemd utilisateur non privilégié, serveur statique Python standard sur loopback, releases identifiées par SHA et lien `current` atomique ; proxy Tailscale Serve privé persistant dédié à 8443, sans modifier 443 ni activer Funnel. Configuration Homepage privée hors Git.
+- **Justification** : réutiliser Python, systemd et Tailscale existants, sans infrastructure publique ni serveur Vite permanent.
+- **Conséquences** : le linger utilisateur nécessite une autorisation système ciblée ; pas de sudoers général. Logs dans le journal utilisateur. La prévisualisation PR reste distincte d’une future version stable ; l’automatisation de main n’est qu’une proposition dans `ops/README.md`, sans timer activé.
 
 ## Orientations et choix encore à confirmer
 
-- Architecture applicative concrète, stack, hébergement et distribution iOS/Android.
-- Mécanisme sécurisé d’authentification GitHub pour Codex et protections de branche.
+- Architecture au-delà du prototype statique, hébergement public et distribution iOS/Android.
+- Audit de l’isolation des identifiants GitHub et des protections de branche ; le workflow App est opérationnel.
 - Organisation des agents de test et de revue, couverture de tests et futurs contrôles de livraison.
 - Détails des classements, séries et partage, ainsi que les règles calendaires des défis quotidiens.
 
