@@ -22,7 +22,14 @@ Target platforms:
 - Follow Conventional Commits.
 - Keep commits small and meaningful.
 - Use Pull Requests for integration.
-- Never merge or deploy without human approval.
+- Never merge or deploy without human approval. For development deployments to the existing private Tailscale preview only, the standing approval below applies.
+
+### Standing approval — private development preview
+- Since 2026-11-24, the user authorizes agents to publish new development versions and redeploy corrections to the existing private Arcaday Tailscale preview without requesting approval each time.
+- This approval covers static game releases only. It does not authorize production/public deployments, PR merges, infrastructure changes, services, network configuration, or new permissions.
+- Follow `ops/README.md`: identify the exact commit, prepare it in isolation, run TypeScript, unit tests, browser tests and build, preserve the previous release, then verify the served revision and HTTPS assets. Restore the previous release if post-publication checks fail.
+- Keep native sandbox approvals and least-privilege restrictions. Standing user approval does not bypass technical permission controls.
+- Report the deployed commit and verification results. Documentation-only changes do not automatically trigger a deployment.
 
 ## Development Process
 1. Understand the requirements.

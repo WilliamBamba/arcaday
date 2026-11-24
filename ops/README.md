@@ -28,18 +28,27 @@ Les droits Tailscale sont distincts des permissions du système de fichiers.
 
 ## Mise à jour du prototype
 
-L’agent synchronise la branche PR approuvée par avance rapide, inspecte le SHA,
-exécute `npm ci`, `npm run check`, puis `npm run test:e2e`. Après réussite :
+Depuis le 2026-11-24, l’utilisateur autorise les publications et republications de
+versions de développement sur cette prévisualisation privée sans nouvel accord
+à chaque fois (voir `AGENTS.md`). Production, fusion et modifications de services,
+réseau ou permissions restent exclues ; les approbations natives restent applicables.
+
+L’agent identifie le SHA de la branche PR et le prépare dans un répertoire isolé
+(par exemple via `git archive <SHA>`), en préservant le dépôt de développement.
+Dans ce répertoire, exécuter `npm ci`, `npm run check`, puis `npm run test:e2e`.
+Après réussite, publier avec le SHA exact préparé (l’archive n’a pas de `.git`) :
 
 ```sh
-python3 ops/publish-preview.py dist "$(git rev-parse HEAD)" \
+python3 ops/publish-preview.py dist '<SHA_COMPLET>' \
   --root "$HOME/.local/share/arcaday-preview"
 curl --fail http://127.0.0.1:4173/release.json
 ```
 
 Les publications doivent être sérialisées. Un SHA existant n’est pas écrasé.
-Si le contrôle HTTP après publication échoue, rétablir atomiquement `current`
-vers la cible de `previous`, puis revérifier HTTP. Une publication initiale
+Vérifier le service actif, `release.json`, le certificat HTTPS, le HTML, les
+ressources JavaScript/CSS et le chargement navigateur. Si un contrôle après
+publication échoue, rétablir atomiquement `current` vers la cible conservée
+de la version précédente, puis revérifier HTTP et HTTPS. Une publication initiale
 sans version précédente doit être arrêtée si son contrôle échoue.
 Ne pas supprimer une ancienne version pendant une session de test.
 
