@@ -24,7 +24,8 @@ la prévisualisation privée persistante utilise Tailscale et le service décrit
 - Clavier : flèches gauche/droite, A/Q et D ; Espace, flèche haut, W/Z pour sauter.
 - Appui bref = saut court ; maintien = saut haut. Relâcher puis appuyer pour resauter.
 - Directions opposées = arrêt. Pas de double saut. Sortir le doigt du bouton désactive
-  sa commande ; revenir la réactive. Glisser vers un autre bouton ne l’active pas.
+  sa commande ; glisser entre gauche et droite change immédiatement de direction.
+  Entre les boutons, le doigt ne déplace plus le joueur. Le saut reste indépendant.
   Chaque doigt est indépendant ; relâchement, annulation et interruptions nettoient les commandes.
 - Éviter les pics et atteindre le drapeau au sommet des quatre plateformes.
 - Une mort ajoute 1 au compteur et replace le personnage au départ après 180 ms.
@@ -57,12 +58,15 @@ le contrôle documentaire et les vérifications applicatives, dont Chromium.
 
 Le premier prototype, déplacements, collisions, saut variable et dernières corrections
 tactiles compris, est validé sur iPhone réel par l’utilisateur. Les tests automatisés
-couvrent désormais 8 cas unitaires et 12 scénarios Chromium. Ils ne constituent pas une validation
+couvrent désormais 8 cas unitaires et 14 scénarios Chromium. Ils ne constituent pas une validation
 exhaustive de Safari, d’Android ou des performances de tous les appareils.
 
-La phase 16 ajoute la boucle mort, réapparition et victoire. Restent à valider sur
-iPhone : lisibilité des pics, rythme du recommencement, relâchement des doigts après
-une mort, compteur et bouton Rejouer. Aucun réglage de mouvement n’a changé.
+La boucle de phase 16 (pics, mort, réapparition, compteur, victoire et Rejouer) est
+validée sur iPhone par l’utilisateur. Les corrections suivantes restent à confirmer
+sur Safari iPhone : glissement gauche/droite et disparition de la sélection bleue.
+La protection contre sélection, menus contextuels et surlignages natifs est limitée
+à l’interface du jeu ; Rejouer et le focus clavier restent disponibles.
+Aucun réglage de mouvement n’a changé.
 Le moteur produit un bundle d’environ 342 ko gzip : temps de chargement mobile à mesurer.
 
 Pas de système quotidien, backend, classement, obstacle complexe, décoration détaillée,

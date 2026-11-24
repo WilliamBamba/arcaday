@@ -82,7 +82,7 @@ test('simultaneous touch, cancellation, blur and small portrait layout', async (
 });
 
 
-test('touch controls hide keyboard help and scope long-press protection', async ({ page, browser }) => {
+test('game UI suppresses selection and tap highlights while preserving keyboard focus', async ({ page, browser }) => {
   await expect(page.getByRole('button', { name: 'Sauter' })).toHaveText('↑');
   await expect(page.locator('.hint')).toBeHidden();
   const controls = page.getByRole('navigation', { name: 'Commandes du jeu' });
@@ -91,20 +91,28 @@ test('touch controls hide keyboard help and scope long-press protection', async 
     const fire = (selector: string) => !document.querySelector(selector)!.dispatchEvent(
       new MouseEvent('contextmenu', { bubbles: true, cancelable: true }),
     );
-    return { controls: fire('.touch-controls'), jump: fire('[data-action="jump"]'), header: fire('header') };
+    return { controls: fire('.touch-controls'), jump: fire('[data-action="jump"]'), header: fire('header'), outside: fire('body') };
   });
-  expect(canceled).toEqual({ controls: true, jump: true, header: false });
-  expect(await page.locator('header').evaluate(el => getComputedStyle(el).userSelect)).not.toBe('none');
+  expect(canceled).toEqual({ controls: true, jump: true, header: true, outside: false });
+  for (const selector of ['header', '#run-status', 'canvas', '#replay', '.touch-controls']) {
+    await expect(page.locator(selector)).toHaveCSS('user-select', 'none');
+    await expect(page.locator(selector)).toHaveCSS('-webkit-tap-highlight-color', 'rgba(0, 0, 0, 0)');
+  }
   const desktop = await browser.newContext({ viewport: { width: 1280, height: 800 }, hasTouch: false });
   try {
     const desktopPage = await desktop.newPage();
     await desktopPage.goto('/');
     await expect(desktopPage.locator('.hint')).toBeVisible();
+    await desktopPage.keyboard.press('Tab');
+    const focused = desktopPage.locator(':focus-visible');
+    await expect(focused).toHaveAttribute('data-action', 'left');
+    await expect(focused).toHaveCSS('outline-style', 'solid');
+    await expect(focused).toHaveCSS('outline-width', '3px');
   } finally { await desktop.close(); }
 });
 
 // CDP delivers real touch sequences and exercises the browser's pointer capture.
-test('captured fingers leave and return only to their original button', async ({ page, context }) => {
+test('captured direction slides both ways through gaps independently of jump', async ({ page, context }) => {
   await reset(page, 235);
   const client = await context.newCDPSession(page);
   const left = page.getByRole('button', { name: 'Gauche' });
@@ -124,11 +132,21 @@ test('captured fingers leave and return only to their original button', async ({
   await expect(right).toHaveAttribute('data-held', 'true');
   finger1.x = l.x + l.width / 2; await send('touchMove');
   await expect(right).toHaveAttribute('data-held', 'false');
-  await expect(left).toHaveAttribute('data-held', 'false');
+  await expect(left).toHaveAttribute('data-held', 'true');
   await expect(jump).toHaveAttribute('data-held', 'true');
+  expect((await state(page)).vx).toBe(-190);
+  finger1.x = (l.x + l.width + r.x) / 2; await send('touchMove');
+  await expect(left).toHaveAttribute('data-held', 'false');
+  await expect(right).toHaveAttribute('data-held', 'false');
   expect((await state(page)).vx).toBe(0);
   finger1.x = r.x + r.width / 2; await send('touchMove');
   await expect(right).toHaveAttribute('data-held', 'true');
+  await expect(left).toHaveAttribute('data-held', 'false');
+  expect((await state(page)).vx).toBe(190);
+  finger1.y = r.y - 10; await send('touchMove');
+  expect((await state(page)).vx).toBe(0);
+  await expect(jump).toHaveAttribute('data-held', 'true');
+  finger1.y = r.y + r.height / 2; await send('touchMove');
   // Exiting jump cuts ascent just like lifting that finger, without clearing direction.
   finger2.y = j.y - 10; await send('touchMove');
   await expect(jump).toHaveAttribute('data-held', 'false');
@@ -167,9 +185,11 @@ for (const interruption of ['blur', 'visibilitychange', 'lostpointercapture'] as
     }, interruption);
     // Browsers process pending capture changes before the next pointer event.
     if (interruption !== 'lostpointercapture') await expect(button).toHaveAttribute('data-held', 'false');
-    finger.x += 5;
+    const leftBox = (await page.getByRole('button', { name: 'Gauche' }).boundingBox())!;
+    finger.x = leftBox.x + leftBox.width / 2;
     await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [finger] });
     await expect(button).toHaveAttribute('data-held', 'false');
+    await expect(page.getByRole('button', { name: 'Gauche' })).toHaveAttribute('data-held', 'false');
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.keyboard.down('ArrowRight');
     await expect(button).toHaveAttribute('data-held', 'true');
@@ -216,16 +236,19 @@ test('death releases captures and moving old fingers cannot reactivate after res
   await place(page, 175, 498);
   await expect.poll(async () => (await runState(page)).deaths).toBe(1);
   await expect.poll(async () => (await runState(page)).phase).toBe('playing');
-  fingers[0]!.x += 2; fingers[1]!.x += 2;
+  const left = page.getByRole('button', { name: 'Gauche' });
+  const l = (await left.boundingBox())!;
+  fingers[0]!.x = l.x + l.width / 2; fingers[1]!.x += 2;
   await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: fingers });
   await frames(page, 20);
   await expect(right).toHaveAttribute('data-held', 'false');
+  await expect(left).toHaveAttribute('data-held', 'false');
   await expect(jump).toHaveAttribute('data-held', 'false');
   expect((await state(page)).x).toBeCloseTo(25, 0);
   expect((await state(page)).grounded).toBe(true);
   await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: fingers });
-  await expect(right).toHaveAttribute('data-held', 'true');
+  await expect(left).toHaveAttribute('data-held', 'true');
   await expect(jump).toHaveAttribute('data-held', 'true');
   await client.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
 });
@@ -293,4 +316,63 @@ test('the course can be completed with keyboard jumps without teleporting', asyn
   await expect(page.locator('#result')).toBeVisible();
   await page.keyboard.up('ArrowRight');
   expect(await runState(page)).toEqual({ phase: 'won', deaths: 0 });
+});
+
+
+test('direction fingers stay independent and cannot slide into jump', async ({ page, context }) => {
+  await reset(page, 235);
+  const client = await context.newCDPSession(page);
+  const left = page.getByRole('button', { name: 'Gauche' });
+  const right = page.getByRole('button', { name: 'Droite' });
+  const jump = page.getByRole('button', { name: 'Sauter' });
+  const l = (await left.boundingBox())!, r = (await right.boundingBox())!, j = (await jump.boundingBox())!;
+  const a = { id: 1, x: l.x + l.width / 2, y: l.y + l.height / 2 };
+  const b = { id: 2, x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [a, b] });
+  await frames(page, 2); expect((await state(page)).vx).toBe(0);
+  a.x = b.x;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [a, b] });
+  await frames(page, 2); expect((await state(page)).vx).toBe(190);
+  await expect(left).toHaveAttribute('data-held', 'false');
+  a.x = j.x + j.width / 2;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [a, b] });
+  await expect(jump).toHaveAttribute('data-held', 'false');
+  await expect(right).toHaveAttribute('data-held', 'true');
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [a] });
+  await expect(right).toHaveAttribute('data-held', 'true');
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await expect(right).toHaveAttribute('data-held', 'false');
+  // A finger that started on jump cannot become a direction finger either.
+  a.x = j.x + j.width / 2;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [a] });
+  await expect(jump).toHaveAttribute('data-held', 'true');
+  a.x = l.x + l.width / 2;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [a] });
+  await expect(jump).toHaveAttribute('data-held', 'false');
+  await expect(left).toHaveAttribute('data-held', 'false');
+  await client.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
+});
+
+test('victory and replay discard a finger that switched directions', async ({ page, context }) => {
+  const client = await context.newCDPSession(page);
+  const left = page.getByRole('button', { name: 'Gauche' });
+  const right = page.getByRole('button', { name: 'Droite' });
+  const l = (await left.boundingBox())!, r = (await right.boundingBox())!;
+  const finger = { id: 1, x: l.x + l.width / 2, y: l.y + l.height / 2 };
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [finger] });
+  finger.x = r.x + r.width / 2;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [finger] });
+  await expect(right).toHaveAttribute('data-held', 'true');
+  await place(page, 288, 216);
+  await expect(page.locator('#result')).toBeVisible();
+  await expect(right).toHaveAttribute('data-held', 'false');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#result')).toBeHidden();
+  finger.x = l.x + l.width / 2;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [finger] });
+  await expect(left).toHaveAttribute('data-held', 'false');
+  await expect(right).toHaveAttribute('data-held', 'false');
+  await frames(page, 10);
+  expect((await state(page)).x).toBeCloseTo(25, 0);
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 });

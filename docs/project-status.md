@@ -17,7 +17,7 @@
 
 Arcaday, sous la marque **NUSINI**, vise une collection de mini-jeux quotidiens, mobile-first et portrait-first. Daily Impossible est un jeu de plateforme 2D ; Daily Crime, une future enquête. Web/PWA est la direction produit, avec iOS/Android envisagés ultérieurement.
 
-Le **premier prototype Daily Impossible est terminé et validé sur iPhone réel selon l’utilisateur**, y compris les dernières corrections tactiles. La phase 16 ajoute sur une branche dédiée les pics mortels fixes, la réapparition rapide, le compteur de morts et le drapeau avec résultat et bouton Rejouer. Cette nouvelle boucle est testée automatiquement, mais reste à valider sur iPhone ; elle est publiée sur la prévisualisation privée, mais non fusionnée. Le système quotidien, les classements, séries, partage, backend, stockage et distribution native ne sont pas implémentés. La PWA installable reste ultérieure.
+Le **premier prototype Daily Impossible est terminé et validé sur iPhone réel selon l’utilisateur**, y compris les dernières corrections tactiles. La phase 16 ajoute sur une branche dédiée les pics mortels fixes, la réapparition rapide, le compteur de morts et le drapeau avec résultat et bouton Rejouer. Cette boucle est validée sur iPhone par l’utilisateur (pics, collisions, réapparition, compteur, commandes, drapeau et Rejouer) ; elle est publiée sur la prévisualisation privée, mais non fusionnée. Le système quotidien, les classements, séries, partage, backend, stockage et distribution native ne sont pas implémentés. La PWA installable reste ultérieure.
 
 ## 3. Objectifs techniques
 
@@ -57,8 +57,8 @@ Les anciens commits d’une PR squashée ne doivent pas être recréés ou refus
 
 - Terrain logique 360 × 550, sol, quatre plateformes solides et silhouette géométrique.
 - Déplacements, collisions et hauteur de saut variable validés sur iPhone selon l’utilisateur. Ne pas modifier leur comportement pendant la prochaine fonctionnalité sans justification et validation.
-- Boutons gauche/droite/↑, nom accessible « Sauter », aide clavier masquée sur les appareils tactiles ; sélection et menus contextuels inhibés uniquement dans la zone des commandes.
-- Chaque doigt reste associé à son bouton initial : sortie du rectangle désactive la commande, retour la réactive, passage sur un autre bouton sans activation. Multitouch indépendant ; relâchement, annulation, perte de capture, focus et visibilité nettoient les commandes. Clavier conservé.
+- Boutons gauche/droite/↑, nom accessible « Sauter », aide clavier masquée sur les appareils tactiles ; protection contre sélection, menus contextuels et surlignages natifs étendue à l’interface du jeu ; disparition de la sélection bleue à confirmer sur Safari iPhone.
+- Chaque doigt garde son propriétaire de capture initial. Pour une direction, glisser entre Gauche et Droite change la commande ; espaces et sortie des zones la désactivent. Un doigt de saut reste réservé au saut, sans activation par glissement depuis une direction. Multitouch indépendant ; relâchement, annulation, perte de capture, focus et visibilité nettoient les commandes. Clavier conservé.
 
 ### Phase 16 — boucle de gameplay
 
@@ -67,9 +67,10 @@ Les anciens commits d’une PR squashée ne doivent pas être recréés ou refus
 - Paramètres de `movement.ts` et géométrie des quatre plateformes inchangés. Parcours complet réalisable au clavier, vérifié sans téléportation par un scénario navigateur.
 - TypeScript, 8 tests unitaires, 12 tests Chromium et build réussis localement. Les 8 scénarios navigateur précédents sont conservés ; deux positions de départ de tests d’entrée sont décalées pour éviter les nouveaux pics.
 - PR #9 ouverte, commit applicatif `ed5f05f1d60965073f7c6cf6f9e5276eb5f3a303` : deux contrôles GitHub Actions réussis. Le commit documentaire suivant doit être vérifié indépendamment.
-- Publication privée effectuée le 24 novembre depuis une archive isolée du SHA exact, après `npm ci`, types, 8 tests unitaires, 12 tests Chromium et build. Révision HTTPS vérifiée : **`ed5f05f1d60965073f7c6cf6f9e5276eb5f3a303`** ; retour arrière conservé : **`7140d235e1056bf6ebfa245c33b40217313cbdac`**.
+- Publication privée effectuée le 24 novembre depuis une archive isolée du SHA exact, après `npm ci`, types, 8 tests unitaires, 12 tests Chromium et build. Révision HTTPS vérifiée lors de cette publication initiale : **`ed5f05f1d60965073f7c6cf6f9e5276eb5f3a303`** ; retour arrière conservé : **`7140d235e1056bf6ebfa245c33b40217313cbdac`**.
 - Service actif et activé ; certificat HTTPS, HTML et ressources JS/CSS vérifiés, octets identiques au build isolé. Smoke test Chromium sur HTTPS : chargement, sortie/retour tactile, collision mortelle, compteur et nettoyage des entrées réussis, sans erreur détectée. Aucune configuration de service/réseau modifiée.
-- À valider sur iPhone : lisibilité et hitboxes des pics, délai de reprise, doigts maintenus pendant une mort, compteur, victoire et Rejouer. La validation du prototype précédent reste acquise, celle de cette boucle reste à faire.
+- Validation iPhone de toute la boucle confirmée par l’utilisateur. Corrections ergonomiques suivantes : glissement bidirectionnel indépendant du saut et protection Safari sur toute l’interface ; reste à confirmer sur iPhone, notamment l’absence de sélection bleue.
+- La suite navigateur est actualisée pour ces corrections : 14 scénarios, dont espaces, deux doigts de direction, saut indépendant, interruptions et anciens doigts après mort/victoire. Aucun changement des paramètres physiques.
 
 ### Tests et publication du prototype précédent
 
@@ -89,7 +90,7 @@ Les protections (PR, approbation humaine, squash, révocation des approbations, 
 
 ## 7. Roadmap
 
-1. Revoir la PR de phase 16 et ses deux contrôles CI, puis valider la boucle sur iPhone depuis la prévisualisation privée publiée.
+1. Revoir la PR de phase 16 et ses deux contrôles CI, puis confirmer les deux corrections ergonomiques sur Safari iPhone. Le gameplay de phase 16 est validé.
 2. Ajuster uniquement les défauts constatés avant éventuelle intégration autorisée. Le niveau complet de deux minutes, checkpoints et animations détaillées restent hors périmètre.
 3. Plus tard : système quotidien, progression des jeux, distribution PWA/native et déploiement stable automatisé après validation. Daily Crime reste ultérieur.
 
@@ -97,8 +98,8 @@ Les protections (PR, approbation humaine, squash, révocation des approbations, 
 
 - Examiner la branche `feat/daily-impossible-gameplay-loop`, sa PR et les contrôles du dernier commit. Ne pas refaire la PR #8 ni rouvrir #7.
 - La boucle est publiée en privé ; recueillir les essais iPhone et corriger si nécessaire. L’autorisation permanente permet de republier les corrections après contrôles sans redemander un accord. Ne pas fusionner automatiquement.
-- Préserver les paramètres de mouvement et les commandes validées. Tester sur iPhone les transitions mort/réapparition/victoire/rejouer et la nécessité de réappuyer après une mort.
-- La prévisualisation sert `ed5f05f`, avec retour arrière `7140d23`, vérifiés le 24 novembre. Ne pas toucher à Tailscale, Homepage ou aux autres services.
+- Préserver les paramètres de mouvement et les commandes validées. La boucle de gameplay est validée ; tester les glissements entre directions et la disparition de la sélection bleue sur Safari iPhone.
+- Dernière publication vérifiée avant les corrections ergonomiques : `ed5f05f`, retour arrière `7140d23`. La publication des corrections est autorisée ; vérifier `release.json` et les liens `current`/`previous` pour connaître les SHA effectivement servis après publication. Ne pas toucher à Tailscale, Homepage ou aux autres services.
 - Automatisation future seulement proposée : commande lancée par l’agent après validation humaine d’un SHA de main, préparation isolée, contrôles, publication atomique, santé HTTPS et retour arrière. Aucun déclenchement automatique actif.
 
 ## 9. Journal récent
@@ -107,6 +108,7 @@ Les protections (PR, approbation humaine, squash, révocation des approbations, 
 | --- | --- |
 | 2026-11-16 | Service privé, linger, HTTPS et carte Homepage vérifiés après intervention administrative |
 | 2026-11-16 | Corrections ergonomiques `c09e955`, puis `7140d23`, testées, publiées sur #8 et déployées en privé après autorisations distinctes |
+| 2026-11-24 | Validation iPhone de la boucle confirmée ; corrections de glissement directionnel et sélection Safari sur la branche de #9, à confirmer sur appareil |
 | 2026-11-24 | Phase 16 : PR #9, commit `ed5f05f` testé puis publié en privé ; HTTPS vérifié, retour arrière `7140d23`. Autorisation permanente de publication privée consignée, hors production et infrastructure |
 | 2026-11-16 | Validation finale iPhone confirmée par l’utilisateur, y compris la sortie/entrée tactile ; mémoire consolidée pour revue de #8, prochaine étape définie : boucle de gameplay |
 

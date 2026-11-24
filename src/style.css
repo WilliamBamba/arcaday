@@ -20,6 +20,12 @@ button:focus-visible { outline: 3px solid #201e1a; outline-offset: 2px; }
 .hint { text-align: center; font-size: 11px; }
 @media (max-height: 450px) { header p, .hint { display: none; } button { min-height: 48px; } }
 
-/* Keep long-press suppression local to the controls, including their gaps. */
-.touch-controls { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+/* Suppress Safari selection/callouts/tap flashes throughout the game UI.
+   Keep native button activation and the explicit :focus-visible outline. */
+.game-interface, .game-interface * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
 @media (hover: none) and (pointer: coarse) { .hint { display: none; } }

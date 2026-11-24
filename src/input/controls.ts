@@ -47,7 +47,9 @@ export function bindControls(controls: Controls): () => void {
   const paint = () => buttons.forEach(button => {
     button.dataset.held = String(controls.held(button.dataset.action as Action));
   });
-  // Ownership survives leaving the rectangle, but not interruption or release.
+  const directions = [...buttons].filter(button => button.dataset.action !== 'jump');
+  // Keep the capture owner, even when its finger activates the other direction.
+  // Ownership survives gaps, but not interruption, release or a run transition.
   const pointers = new Map<number, HTMLButtonElement>();
   const finish = (id: number) => {
     const button = pointers.get(id);
@@ -68,10 +70,13 @@ export function bindControls(controls: Controls): () => void {
       finish(event.pointerId);
       return;
     }
-    const rect = button.getBoundingClientRect();
-    const inside = event.clientX >= rect.left && event.clientX < rect.right
-      && event.clientY >= rect.top && event.clientY < rect.bottom;
-    if (inside) controls.press(`pointer:${event.pointerId}`, button.dataset.action as Action);
+    const candidates = button.dataset.action === 'jump' ? [button] : directions;
+    const active = candidates.find(candidate => {
+      const rect = candidate.getBoundingClientRect();
+      return event.clientX >= rect.left && event.clientX < rect.right
+        && event.clientY >= rect.top && event.clientY < rect.bottom;
+    });
+    if (active) controls.press(`pointer:${event.pointerId}`, active.dataset.action as Action);
     else controls.release(`pointer:${event.pointerId}`);
     paint();
   };
@@ -89,7 +94,7 @@ export function bindControls(controls: Controls): () => void {
       button.addEventListener(type, event => finish(event.pointerId), options);
     }
   });
-  document.querySelector('.touch-controls')?.addEventListener('contextmenu', event => event.preventDefault(), options);
+  document.querySelector('.game-interface')?.addEventListener('contextmenu', event => event.preventDefault(), options);
   window.addEventListener('keydown', event => {
     if (event.target instanceof HTMLButtonElement && !event.target.dataset.action) return;
     const action = keys[event.code];
