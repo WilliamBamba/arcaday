@@ -58,7 +58,7 @@ test('variable height, no automatic bounce or air jump', async ({ page }) => {
   expect((await state(page)).vy).toBeGreaterThan(-200); await page.keyboard.up('Space');
 });
 test('simultaneous touch, cancellation, blur and small portrait layout', async ({ page, context }) => {
-  await reset(page, 180);
+  await reset(page, 235);
   const right = (await page.getByRole('button', { name: 'Droite' }).boundingBox())!;
   const jump = (await page.getByRole('button', { name: 'Sauter' }).boundingBox())!;
   const client = await context.newCDPSession(page);
@@ -105,7 +105,7 @@ test('touch controls hide keyboard help and scope long-press protection', async 
 
 // CDP delivers real touch sequences and exercises the browser's pointer capture.
 test('captured fingers leave and return only to their original button', async ({ page, context }) => {
-  await reset(page, 180);
+  await reset(page, 235);
   const client = await context.newCDPSession(page);
   const left = page.getByRole('button', { name: 'Gauche' });
   const right = page.getByRole('button', { name: 'Droite' });
@@ -177,3 +177,120 @@ for (const interruption of ['blur', 'visibilitychange', 'lostpointercapture'] as
     await expect(button).toHaveAttribute('data-held', 'false');
   });
 }
+
+const runState = (page: Page) => page.evaluate(() => {
+  const s = window.__game.scene.getScene('test') as TestScene;
+  return { phase: s.run.phase, deaths: s.run.deaths };
+});
+const place = (page: Page, x: number, y: number) => page.evaluate(({ x, y }) => {
+  (window.__game.scene.getScene('test') as TestScene).player.body.reset(x, y);
+}, { x, y });
+
+test('lethal overlap counts once, respawns and clears held keyboard input', async ({ page }) => {
+  await reset(page, 120);
+  await page.keyboard.down('ArrowRight');
+  await expect.poll(async () => (await runState(page)).deaths).toBe(1);
+  await expect.poll(async () => (await runState(page)).phase).toBe('playing');
+  await frames(page, 20);
+  expect((await state(page)).x).toBeCloseTo(25, 0);
+  expect((await state(page)).vx).toBe(0);
+  expect((await state(page)).grounded).toBe(true);
+  await expect(page.locator('#run-status')).toHaveText('Morts : 1');
+  await page.keyboard.up('ArrowRight');
+  await page.keyboard.down('ArrowRight'); await frames(page, 5);
+  expect((await state(page)).vx).toBe(190); await page.keyboard.up('ArrowRight');
+  await place(page, 175, 498);
+  await expect.poll(async () => (await runState(page)).deaths).toBe(2);
+});
+
+test('death releases captures and moving old fingers cannot reactivate after respawn', async ({ page, context }) => {
+  await reset(page, 235);
+  const client = await context.newCDPSession(page);
+  const right = page.getByRole('button', { name: 'Droite' });
+  const jump = page.getByRole('button', { name: 'Sauter' });
+  const r = (await right.boundingBox())!, j = (await jump.boundingBox())!;
+  const fingers = [{ id: 1, x: r.x + r.width / 2, y: r.y + r.height / 2 },
+    { id: 2, x: j.x + j.width / 2, y: j.y + j.height / 2 }];
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: fingers });
+  await expect(jump).toHaveAttribute('data-held', 'true');
+  await place(page, 175, 498);
+  await expect.poll(async () => (await runState(page)).deaths).toBe(1);
+  await expect.poll(async () => (await runState(page)).phase).toBe('playing');
+  fingers[0]!.x += 2; fingers[1]!.x += 2;
+  await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: fingers });
+  await frames(page, 20);
+  await expect(right).toHaveAttribute('data-held', 'false');
+  await expect(jump).toHaveAttribute('data-held', 'false');
+  expect((await state(page)).x).toBeCloseTo(25, 0);
+  expect((await state(page)).grounded).toBe(true);
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: fingers });
+  await expect(right).toHaveAttribute('data-held', 'true');
+  await expect(jump).toHaveAttribute('data-held', 'true');
+  await client.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
+});
+
+test('goal wins once, freezes movement, and replay resets the entire run without reload', async ({ page }) => {
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await place(page, 175, 498);
+  await expect.poll(async () => (await runState(page)).deaths).toBe(1);
+  await expect.poll(async () => (await runState(page)).phase).toBe('playing');
+  await place(page, 288, 216);
+  await expect(page.getByRole('region', { name: 'Résultat' })).toBeVisible();
+  await expect(page.locator('#result-text')).toHaveText('Victoire ! 1 mort(s).');
+  await frames(page, 30);
+  expect(await runState(page)).toEqual({ phase: 'won', deaths: 1 });
+  expect((await state(page)).vx).toBe(0); expect((await state(page)).vy).toBe(0);
+  const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+  // Native keyboard activation of the focused replay button must remain available.
+  await page.keyboard.press('Space');
+  await expect(page.locator('#result')).toBeHidden();
+  expect(await runState(page)).toEqual({ phase: 'playing', deaths: 0 });
+  await frames(page, 20);
+  expect((await state(page)).x).toBeCloseTo(25, 0);
+  expect((await state(page)).grounded).toBe(true);
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(timeOrigin);
+  await place(page, 288, 216);
+  await expect(page.locator('#result')).toBeVisible();
+  await page.getByRole('button', { name: 'Rejouer' }).tap();
+  await expect(page.locator('#result')).toBeHidden();
+  expect(await runState(page)).toEqual({ phase: 'playing', deaths: 0 });
+  expect(errors).toEqual([]);
+});
+
+
+test('the course can be completed with keyboard jumps without teleporting', async ({ page }) => {
+  await expect.poll(async () => (await state(page)).grounded).toBe(true);
+  const steer = async (target: number) => {
+    const direction = (await state(page)).x < target ? 'ArrowRight' : 'ArrowLeft';
+    await page.keyboard.down(direction);
+    await page.waitForFunction(({ target, direction }) => {
+      const x = (window.__game.scene.getScene('test') as TestScene).player.x;
+      return direction === 'ArrowRight' ? x >= target : x <= target;
+    }, { target, direction });
+    await page.keyboard.up(direction);
+  };
+  const jumpTo = async (target: number, delay = 0) => {
+    await page.keyboard.down('Space');
+    if (delay) await frames(page, delay);
+    await steer(target);
+    await page.keyboard.up('Space');
+    await expect.poll(async () => (await state(page)).grounded).toBe(true);
+    expect((await runState(page)).deaths).toBe(0);
+  };
+  await jumpTo(95, 13);
+  expect((await state(page)).y).toBeCloseTo(448, 0);
+  await steer(137);
+  await jumpTo(230);
+  expect((await state(page)).y).toBeCloseTo(378, 0);
+  await steer(210);
+  await jumpTo(115);
+  expect((await state(page)).y).toBeCloseTo(308, 0);
+  await steer(140);
+  await jumpTo(240);
+  expect((await state(page)).y).toBeCloseTo(238, 0);
+  await page.keyboard.down('ArrowRight');
+  await expect(page.locator('#result')).toBeVisible();
+  await page.keyboard.up('ArrowRight');
+  expect(await runState(page)).toEqual({ phase: 'won', deaths: 0 });
+});

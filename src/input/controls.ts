@@ -5,14 +5,26 @@ export interface InputFrame { direction: number; jumpHeld: boolean; jumpPressed:
 export class Controls {
   private sources = new Map<string, Action>();
   private pendingJump = false;
+  private clearListeners = new Set<() => void>();
+  enabled = true;
+
+  onClear(listener: () => void): () => void {
+    this.clearListeners.add(listener);
+    return () => { this.clearListeners.delete(listener); };
+  }
+  setEnabled(enabled: boolean): void { this.enabled = enabled; this.clear(); }
 
   press(source: string, action: Action): void {
+    if (!this.enabled) return;
     if (action === 'jump' && !this.held('jump')) this.pendingJump = true;
     this.sources.set(source, action);
   }
   release(source: string): void { this.sources.delete(source); }
   held(action: Action): boolean { return [...this.sources.values()].includes(action); }
-  clear(): void { this.sources.clear(); this.pendingJump = false; }
+  clear(): void {
+    this.sources.clear(); this.pendingJump = false;
+    this.clearListeners.forEach(listener => listener());
+  }
   sample(): InputFrame {
     const frame = {
       direction: Number(this.held('right')) - Number(this.held('left')),
@@ -44,11 +56,11 @@ export function bindControls(controls: Controls): () => void {
     if (button?.hasPointerCapture(id)) button.releasePointerCapture(id);
     paint();
   };
-  const clear = () => {
+  const clear = () => controls.clear();
+  const detachClear = controls.onClear(() => {
     for (const id of pointers.keys()) finish(id);
-    controls.clear();
     paint();
-  };
+  });
   const updatePointer = (event: PointerEvent) => {
     const button = pointers.get(event.pointerId);
     if (!button) return;
@@ -65,6 +77,7 @@ export function bindControls(controls: Controls): () => void {
   };
   buttons.forEach(button => {
     button.addEventListener('pointerdown', event => {
+      if (!controls.enabled) return;
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       event.preventDefault();
       button.setPointerCapture(event.pointerId);
@@ -78,6 +91,7 @@ export function bindControls(controls: Controls): () => void {
   });
   document.querySelector('.touch-controls')?.addEventListener('contextmenu', event => event.preventDefault(), options);
   window.addEventListener('keydown', event => {
+    if (event.target instanceof HTMLButtonElement && !event.target.dataset.action) return;
     const action = keys[event.code];
     if (!action) return;
     event.preventDefault();
@@ -86,9 +100,10 @@ export function bindControls(controls: Controls): () => void {
   }, options);
   window.addEventListener('keyup', event => {
     if (!keys[event.code]) return;
-    event.preventDefault(); controls.release(`key:${event.code}`); paint();
+    if (!(event.target instanceof HTMLButtonElement && !event.target.dataset.action)) event.preventDefault();
+    controls.release(`key:${event.code}`); paint();
   }, options);
   window.addEventListener('blur', clear, options);
   document.addEventListener('visibilitychange', clear, options);
-  return () => { abort.abort(); clear(); };
+  return () => { abort.abort(); clear(); detachClear(); };
 }

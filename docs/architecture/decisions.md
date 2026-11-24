@@ -122,6 +122,15 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Justification** : réutiliser Python, systemd et Tailscale existants, sans infrastructure publique ni serveur Vite permanent.
 - **Conséquences** : le linger utilisateur nécessite une autorisation système ciblée ; pas de sudoers général. Logs dans le journal utilisateur. La prévisualisation PR reste distincte d’une future version stable ; l’automatisation de main n’est qu’une proposition dans `ops/README.md`, sans timer activé.
 
+## ADR-014 — Boucle de gameplay locale et transitions uniques
+
+- **Date** : 2026-11-24.
+- **Statut** : implémentée dans la branche de phase 16 ; validation iPhone et revue à effectuer.
+- **Contexte** : prolonger le prototype validé par une boucle courte sans services ni niveau quotidien.
+- **Décision** : trois zones de pics fixes, détection par overlap Arcade, drapeau sur la dernière plateforme. Une petite classe `Run` porte les états playing/respawning/won et le compteur de morts. Seul playing accepte mort ou victoire ; une mort précède la réapparition de 180 ms. Rejouer remet toute la partie à zéro, sans recharger la page.
+- **Justification** : transitions testables sans moteur, garde contre les collisions répétées, parcours réalisable par les commandes existantes. La scène reste responsable de la physique et de l’affichage minimal HTML.
+- **Conséquences** : mort et victoire arrêtent le corps physique et nettoient touches, doigts, captures et saut en attente. Une nouvelle pression est requise après réapparition. Les paramètres de mouvement et la géométrie des plateformes restent inchangés. Hitboxes rectangulaires couvrant les petits groupes de pics ; lisibilité et tolérance à valider sur iPhone. Cette décision prolonge le terrain libre d’ADR-012, sans checkpoints, persistance ni backend.
+
 ## Orientations et choix encore à confirmer
 
 - Architecture au-delà du prototype statique, hébergement public et distribution iOS/Android.

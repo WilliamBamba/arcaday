@@ -26,7 +26,10 @@ la prévisualisation privée persistante utilise Tailscale et le service décrit
 - Directions opposées = arrêt. Pas de double saut. Sortir le doigt du bouton désactive
   sa commande ; revenir la réactive. Glisser vers un autre bouton ne l’active pas.
   Chaque doigt est indépendant ; relâchement, annulation et interruptions nettoient les commandes.
-- Terrain d’essai libre : sol et quatre plateformes solides, sans victoire ni score.
+- Éviter les pics et atteindre le drapeau au sommet des quatre plateformes.
+- Une mort ajoute 1 au compteur et replace le personnage au départ après 180 ms.
+  Relâcher puis appuyer de nouveau sur les commandes après réapparition.
+- Au drapeau, le résultat fige la partie ; « Rejouer » remet le compteur à zéro sans recharger la page.
 
 ## Vérifications
 
@@ -44,7 +47,7 @@ le contrôle documentaire et les vérifications applicatives, dont Chromium.
 
 ## Structure
 
-- `src/game/` : scène de test et règles de mouvement, paramètres de saut centralisés.
+- `src/game/` : scène, transitions de partie et règles de mouvement, paramètres de saut centralisés.
 - `src/input/` : état des commandes par doigt/touche et adaptation DOM.
 - `src/main.ts`, `src/style.css` : démarrage Phaser et interface sans framework UI.
 - `tests/` : règles unitaires et intégration navigateur.
@@ -54,11 +57,12 @@ le contrôle documentaire et les vérifications applicatives, dont Chromium.
 
 Le premier prototype, déplacements, collisions, saut variable et dernières corrections
 tactiles compris, est validé sur iPhone réel par l’utilisateur. Les tests automatisés
-couvrent 5 cas unitaires et 8 scénarios Chromium. Ils ne constituent pas une validation
+couvrent désormais 8 cas unitaires et 12 scénarios Chromium. Ils ne constituent pas une validation
 exhaustive de Safari, d’Android ou des performances de tous les appareils.
 
-La prochaine fonctionnalité sera la boucle de gameplay : obstacles mortels, mort,
-recommencement et drapeau de victoire. Elle n’est pas encore implémentée.
+La phase 16 ajoute la boucle mort, réapparition et victoire. Restent à valider sur
+iPhone : lisibilité des pics, rythme du recommencement, relâchement des doigts après
+une mort, compteur et bouton Rejouer. Aucun réglage de mouvement n’a changé.
 Le moteur produit un bundle d’environ 342 ko gzip : temps de chargement mobile à mesurer.
 
 Pas de système quotidien, backend, classement, obstacle complexe, décoration détaillée,

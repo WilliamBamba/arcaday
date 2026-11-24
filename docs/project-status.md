@@ -1,6 +1,6 @@
 # Arcaday — mémoire du projet
 
-État consolidé le **16 novembre 2026 (Europe/Paris)** pour la finalisation documentaire de la PR #8. Commencer par la section 8, puis vérifier Git : cet instantané ne remplace pas le dépôt vivant.
+État consolidé le **24 novembre 2026 (Europe/Paris)** pour la phase 16, boucle de gameplay. Commencer par la section 8, puis vérifier Git : cet instantané ne remplace pas le dépôt vivant.
 
 **Vérifié** désigne une observation du dépôt, des outils ou des opérations précédentes de cette mission. **Rapporté** désigne une confirmation de l’utilisateur, notamment les essais iPhone. **À confirmer** distingue ce qui n’a pas été établi.
 
@@ -17,7 +17,7 @@
 
 Arcaday, sous la marque **NUSINI**, vise une collection de mini-jeux quotidiens, mobile-first et portrait-first. Daily Impossible est un jeu de plateforme 2D ; Daily Crime, une future enquête. Web/PWA est la direction produit, avec iOS/Android envisagés ultérieurement.
 
-Le **premier prototype Daily Impossible est terminé et validé sur iPhone réel selon l’utilisateur**, y compris les dernières corrections tactiles. C’est un terrain d’essai libre, sans mort, recommencement, drapeau ni condition de victoire. Le système quotidien, les classements, séries, partage, backend, stockage et distribution native ne sont pas implémentés. La PWA installable reste ultérieure.
+Le **premier prototype Daily Impossible est terminé et validé sur iPhone réel selon l’utilisateur**, y compris les dernières corrections tactiles. La phase 16 ajoute sur une branche dédiée les pics mortels fixes, la réapparition rapide, le compteur de morts et le drapeau avec résultat et bouton Rejouer. Cette nouvelle boucle est testée automatiquement, mais reste à valider sur iPhone ; elle n’est ni fusionnée ni déployée. Le système quotidien, les classements, séries, partage, backend, stockage et distribution native ne sont pas implémentés. La PWA installable reste ultérieure.
 
 ## 3. Objectifs techniques
 
@@ -43,8 +43,8 @@ Le Harness Engineering progresse par GitHub App, tests et CI, revue humaine et p
 | Fondations, vision et mémoire | PR #1/#2 ; vision `c7b272a`, mémoire `ea2306f`, règles de maintenance `e662714` |
 | Revue documentaire et intégration initiale | Corrections `9cad028`, PR #3 intégrée à `1594d78`, PR #4 à `81a9b13`, PR #5 à `a257311` ; historique local vérifié |
 | Workflow App | PR #6 créée puis fermée sans fusion ; branche distante de test supprimée, branche locale conservée ; auteur App vérifié, succès CI du test rapporté |
-| Mémoire du Harness Engineering | PR #7, branche `codex/document-harness-results`, tête `20527f6` ; toujours ouverte lors de cette finalisation |
-| Prototype | `77c2b47` ; CI applicative ajoutée ensuite à la branche, jusqu’à `8f60556` |
+| Mémoire du Harness Engineering | PR #7, branche `codex/document-harness-results`, tête `20527f6` ; fermée sans fusion, état GitHub vérifié le 24 novembre |
+| Prototype | PR #8 fusionnée dans `main` à `438abbb`, vérifié sur GitHub et par fetch ; finalisation documentaire `8cff34a` |
 | Prévisualisation privée | Scripts `5f63724`, puis activation administrative du linger, Serve et Homepage ; vérifications privées réussies |
 | Ergonomie | `c09e955` : flèche de saut et sélection de texte ; `7140d23` : sortie/retour du doigt dans le bouton d’origine |
 | Publication privée et validation iPhone | `7140d235e1056bf6ebfa245c33b40217313cbdac` publié après autorisation ; validation finale sur iPhone confirmée par l’utilisateur |
@@ -60,7 +60,16 @@ Les anciens commits d’une PR squashée ne doivent pas être recréés ou refus
 - Boutons gauche/droite/↑, nom accessible « Sauter », aide clavier masquée sur les appareils tactiles ; sélection et menus contextuels inhibés uniquement dans la zone des commandes.
 - Chaque doigt reste associé à son bouton initial : sortie du rectangle désactive la commande, retour la réactive, passage sur un autre bouton sans activation. Multitouch indépendant ; relâchement, annulation, perte de capture, focus et visibilité nettoient les commandes. Clavier conservé.
 
-### Tests et publication
+### Phase 16 — boucle de gameplay
+
+- Branche `feat/daily-impossible-gameplay-loop`, créée depuis `main` synchronisée par avance rapide à `438abbb` ; dépôt initial propre.
+- Trois groupes de pics fixes, compteur, mort unique, réapparition au départ après 180 ms ; corps et commandes remis à zéro, nouvelle pression nécessaire. Victoire unique au drapeau, arrêt du jeu, résultat et Rejouer sans rechargement ; compteur remis à zéro.
+- Paramètres de `movement.ts` et géométrie des quatre plateformes inchangés. Parcours complet réalisable au clavier, vérifié sans téléportation par un scénario navigateur.
+- TypeScript, 8 tests unitaires, 12 tests Chromium et build réussis localement. Les 8 scénarios navigateur précédents sont conservés ; deux positions de départ de tests d’entrée sont décalées pour éviter les nouveaux pics.
+- Revue et contrôles GitHub du dernier commit à consulter sur la nouvelle PR ; ne pas confondre avec les résultats historiques de #8. Aucun déploiement de cette phase autorisé ou effectué.
+- À valider sur iPhone : lisibilité et hitboxes des pics, délai de reprise, doigts maintenus pendant une mort, compteur, victoire et Rejouer. La validation du prototype précédent reste acquise, celle de cette boucle reste à faire.
+
+### Tests et publication du prototype précédent
 
 - Sur le code `7140d23` : TypeScript, **5 tests unitaires**, **8 tests Playwright/Chromium** et build réussis localement, également dans une préparation isolée avant publication.
 - Test du mécanisme de publication : conservation de la précédente release, bascule et refus des liens symboliques/écrasements vérifiés lors de son installation.
@@ -70,28 +79,25 @@ Les anciens commits d’une PR squashée ne doivent pas être recréés ou refus
 - L’environnement local Chromium a nécessité deux bibliothèques extraites temporairement plutôt qu’une installation système. Elles devront être préparées à nouveau si l’environnement temporaire disparaît ; la CI utilise `playwright install --with-deps chromium`.
 - Avertissement Vite connu : bundle Phaser d’environ 1,49 Mo minifié / 342 ko gzip. Pas de mesure exhaustive de performances, de validation Android ou de couverture de toutes les versions Safari. Cela n’annule pas la validation utilisateur de ce premier prototype.
 
-### PR #7 et revue
+### PR #7 et #8
 
-La PR #7 ne change que `docs/project-status.md`. Ses informations utiles sont conservées ici : workflow App, nettoyage de #6, protections rapportées, limites de sécurité et préférence pour les capacités natives. Ses affirmations « aucun jeu/stack » et sa prochaine action « cadrer le prototype » sont dépassées.
-
-**La PR #8 remplace donc le contenu documentaire utile de #7.** Proposition de revue : après intégration approuvée de #8, fermer #7 comme remplacée, sans fusionner son ancien instantané. Aucune fermeture ou fusion n’est autorisée dans cette mission. Si #7 est traitée avant #8, réexaminer les conflits et préserver l’état actuel.
+La PR #8 est fusionnée à `438abbb` et la PR #7 fermée sans fusion, états vérifiés sur GitHub le 24 novembre. Les informations utiles de #7 sont conservées dans la mémoire ; son ancien instantané ne doit pas être refusionné. La phase 16 utilise une nouvelle branche et une nouvelle PR.
 
 Les protections (PR, approbation humaine, squash, révocation des approbations, branche à jour) restent des informations rapportées. Codex Code Review manuel a été validé selon l’utilisateur ; son déclenchement automatique reste à confirmer indépendamment de la CI.
 
 ## 7. Roadmap
 
-1. Finaliser la revue de la PR #8 ; éventuelle fusion uniquement après autorisation humaine. Le premier prototype est validé pour cette étape.
-2. Prochaine fonctionnalité : **boucle de gameplay complète — obstacles mortels, mort, recommencement et drapeau de victoire**. Elle n’est pas implémentée. Cadrer les règles et critères de test avant développement, en conservant les mouvements validés.
+1. Revoir la PR de phase 16 et ses deux contrôles CI, puis valider la boucle sur iPhone après autorisation de publication d’un SHA précis.
+2. Ajuster uniquement les défauts constatés avant éventuelle intégration autorisée. Le niveau complet de deux minutes, checkpoints et animations détaillées restent hors périmètre.
 3. Plus tard : système quotidien, progression des jeux, distribution PWA/native et déploiement stable automatisé après validation. Daily Crime reste ultérieur.
 
 ## 8. Prochaine action exacte — point de reprise
 
-- Examiner la PR #8, son dernier commit, les deux contrôles CI et les remarques de revue. Ne pas recréer de PR ni fusionner automatiquement.
-- Le gameplay et l’ergonomie actuels ont été validés sur iPhone par l’utilisateur. Ne pas recommencer le cadrage du prototype ou la configuration de prévisualisation déjà terminés.
-- Après clôture de cette étape et instruction de développement, proposer le périmètre minimal de la boucle de gameplay : contacts mortels, état de mort, remise à zéro au recommencement et victoire au drapeau, avec tests de transitions et nettoyage des entrées.
-- Les décisions d’implémentation de cette boucle restent à prendre. Aucun obstacle mortel, mécanisme de mort/restart ou drapeau n’a été ajouté pendant la finalisation documentaire.
-- Les autorisations de publication privée précédentes portaient sur des SHA précis ; elles ne valent pas autorisation de déployer les futures versions. Ne pas toucher à Tailscale, Homepage ou aux autres services.
-- Automatisation future seulement proposée : une commande lancée par l’agent après validation humaine d’un SHA de main, préparation isolée, contrôles, publication atomique, santé HTTPS et retour arrière. Stable distincte du prototype ; aucun timer ni déclenchement sur push actif.
+- Examiner la branche `feat/daily-impossible-gameplay-loop`, sa PR et les contrôles du dernier commit. Ne pas refaire la PR #8 ni rouvrir #7.
+- La boucle de gameplay est implémentée et testée localement ; obtenir l’autorisation de déployer une révision précise avant les essais sur la prévisualisation privée. Ne pas fusionner automatiquement.
+- Préserver les paramètres de mouvement et les commandes validées. Tester sur iPhone les transitions mort/réapparition/victoire/rejouer et la nécessité de réappuyer après une mort.
+- La prévisualisation reste sur `7140d23`, lien `current` vérifié le 24 novembre. Ne pas toucher à Tailscale, Homepage ou aux autres services.
+- Automatisation future seulement proposée : commande lancée par l’agent après validation humaine d’un SHA de main, préparation isolée, contrôles, publication atomique, santé HTTPS et retour arrière. Aucun déclenchement automatique actif.
 
 ## 9. Journal récent
 
@@ -99,6 +105,7 @@ Les protections (PR, approbation humaine, squash, révocation des approbations, 
 | --- | --- |
 | 2026-11-16 | Service privé, linger, HTTPS et carte Homepage vérifiés après intervention administrative |
 | 2026-11-16 | Corrections ergonomiques `c09e955`, puis `7140d23`, testées, publiées sur #8 et déployées en privé après autorisations distinctes |
+| 2026-11-24 | Phase 16 : main synchronisée à `438abbb`, PR #7 fermée confirmée, boucle de gameplay et tests ajoutés sur branche dédiée ; pas de déploiement |
 | 2026-11-16 | Validation finale iPhone confirmée par l’utilisateur, y compris la sortie/entrée tactile ; mémoire consolidée pour revue de #8, prochaine étape définie : boucle de gameplay |
 
 ## 10. Protocole de maintenance

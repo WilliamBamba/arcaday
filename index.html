@@ -8,8 +8,15 @@
 </head>
 <body>
   <main>
-    <header><h1>Daily Impossible</h1><p>Maintenez le saut pour monter plus haut.</p></header>
-    <div id="game" aria-label="Terrain de plateforme"></div>
+    <header><h1>Daily Impossible</h1><p>Évitez les pics et atteignez le drapeau.</p></header>
+    <p id="run-status" role="status">Morts : 0</p>
+    <div class="game-area">
+      <div id="game" aria-label="Terrain de plateforme"></div>
+      <section id="result" aria-label="Résultat" hidden>
+        <p id="result-text" role="status"></p>
+        <button id="replay">Rejouer</button>
+      </section>
+    </div>
     <nav class="touch-controls" aria-label="Commandes du jeu">
       <button data-action="left" aria-label="Gauche">←</button>
       <button data-action="right" aria-label="Droite">→</button>
