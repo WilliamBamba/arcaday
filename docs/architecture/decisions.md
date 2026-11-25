@@ -38,7 +38,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Contexte** : l’autonomie de l’assistant ne vaut pas autorisation d’intégration ou de mise en production.
 - **Décision** : ne jamais fusionner dans `main` ni déployer sans approbation humaine ; autorisation explicite requise pour la fusion.
 - **Justification** : garder le contrôle humain sur les changements intégrés et livrés.
-- **Conséquences** : préparer les résultats vérifiables avant approbation. Aucune protection GitHub ni chaîne de déploiement n’est présumée configurée.
+- **Conséquences** : préparer les résultats vérifiables avant approbation. Depuis le 2026-11-24, l’utilisateur donne une autorisation permanente limitée aux publications de développement sur la prévisualisation privée existante (ADR-015). La fusion et les autres déploiements restent soumis à autorisation explicite. Aucune protection GitHub ni chaîne de déploiement n’est présumée configurée.
 
 ## ADR-005 — Sandbox et autorisations natives de Codex
 
@@ -102,6 +102,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Décision** : terrain logique 360 × 550 ajusté sans déformation, boutons HTML gauche/droite/saut en bas avec Pointer Events et capture par doigt. Clavier de développement parallèle. Impulsion au sol, gravité Arcade, vitesse ascendante limitée au relâchement pour le saut variable.
 - **Justification** : commandes indépendantes de la résolution du canvas, multitouch explicite et règles de mouvement testables sans moteur.
 - **Précision validée le 2026-11-16** : le rectangle du bouton initial est vérifié aux coordonnées de chaque pointeur capturé. Sortir désactive, revenir réactive, glisser vers un autre bouton ne le déclenche pas. Les interruptions suppriment l’association. Flèche ↑ accessible comme « Sauter », aide clavier masquée sur tactile et protection des appuis prolongés limitée aux commandes.
+- **Évolution demandée le 2026-11-24** : un doigt posé sur une direction peut glisser vers l’autre direction, avec arrêt dans les espaces et hors des boutons. La capture reste sur le bouton d’origine ; le hit-test utilise les coordonnées sur les deux rectangles. Un doigt de saut reste réservé au saut. Mort, victoire et interruptions suppriment toujours les associations ; les anciens doigts ne peuvent pas réactiver les commandes. La protection WebKit contre sélection/callout/tap-highlight couvre désormais toute l’interface du jeu, en conservant activation des boutons et focus-visible. Ces évolutions remplacent les restrictions de glissement et de portée CSS ci-dessus ; confirmation Safari iPhone encore nécessaire.
 - **Conséquences** : les sources clavier/tactile sont indépendantes ; directions opposées neutres, pas de double saut ni rebond automatique. Annulation, perte de capture, focus ou visibilité libèrent les entrées. Plateformes solides sur toutes les faces. Déplacements, collisions, saut variable et ergonomie validés sur iPhone réel par l’utilisateur le 2026-11-16.
 
 ## ADR-012 — Priorité au gameplay et graphisme provisoire
@@ -121,6 +122,24 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Décision** : service systemd utilisateur non privilégié, serveur statique Python standard sur loopback, releases identifiées par SHA et lien `current` atomique ; proxy Tailscale Serve privé persistant dédié à 8443, sans modifier 443 ni activer Funnel. Configuration Homepage privée hors Git.
 - **Justification** : réutiliser Python, systemd et Tailscale existants, sans infrastructure publique ni serveur Vite permanent.
 - **Conséquences** : le linger utilisateur nécessite une autorisation système ciblée ; pas de sudoers général. Logs dans le journal utilisateur. La prévisualisation PR reste distincte d’une future version stable ; l’automatisation de main n’est qu’une proposition dans `ops/README.md`, sans timer activé.
+
+## ADR-014 — Boucle de gameplay locale et transitions uniques
+
+- **Date** : 2026-11-24.
+- **Statut** : boucle implémentée et validée sur iPhone selon l’utilisateur ; revue de la PR #9 et vérification des nouvelles corrections ergonomiques à effectuer.
+- **Contexte** : prolonger le prototype validé par une boucle courte sans services ni niveau quotidien.
+- **Décision** : trois zones de pics fixes, détection par overlap Arcade, drapeau sur la dernière plateforme. Une petite classe `Run` porte les états playing/respawning/won et le compteur de morts. Seul playing accepte mort ou victoire ; une mort précède la réapparition de 180 ms. Rejouer remet toute la partie à zéro, sans recharger la page.
+- **Justification** : transitions testables sans moteur, garde contre les collisions répétées, parcours réalisable par les commandes existantes. La scène reste responsable de la physique et de l’affichage minimal HTML.
+- **Conséquences** : mort et victoire arrêtent le corps physique et nettoient touches, doigts, captures et saut en attente. Une nouvelle pression est requise après réapparition. Les paramètres de mouvement et la géométrie des plateformes restent inchangés. Hitboxes rectangulaires couvrant les petits groupes de pics ; lisibilité et tolérance à valider sur iPhone. Cette décision prolonge le terrain libre d’ADR-012, sans checkpoints, persistance ni backend.
+
+## ADR-015 — Autorisation permanente de publication privée de développement
+
+- **Date** : 2026-11-24.
+- **Statut** : explicitement autorisée par l’utilisateur ; consignée dans `AGENTS.md`.
+- **Contexte** : permettre les essais iPhone et corrections sans nouvelle demande d’accord à chaque publication privée.
+- **Décision** : les agents peuvent publier et republier les versions de développement sur la prévisualisation Tailscale existante. Autorisation limitée aux releases statiques ; production, accès public, fusion, infrastructure, services, réseau et permissions sont exclus.
+- **Justification** : conserver une boucle de test courte avec les mécanismes déjà installés.
+- **Conséquences** : SHA identifié, préparation isolée, contrôles types/unitaires/navigateur/build, publication atomique, vérification HTTPS et révision servie, ancienne release conservée et restauration en cas d’échec. Les approbations natives du sandbox restent applicables. Aucun déclencheur automatique n’est installé ; un changement documentaire seul ne déclenche pas de publication. Cette décision précise l’autorisation humaine d’ADR-004 pour ce seul environnement.
 
 ## Orientations et choix encore à confirmer
 
