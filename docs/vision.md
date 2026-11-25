@@ -29,3 +29,11 @@ L'expérience est conçue en priorité pour le mobile : commandes tactiles acces
 ## Plateformes et progression
 
 La première version est prévue sur le Web sous forme de PWA. Une évolution vers iOS et Android est envisagée, mais son implémentation n’est pas encore décidée. Ces perspectives conservent la même vision : des mini-jeux quotidiens accessibles, courts et rejouables.
+
+
+## Règles Daily Impossible validées en phase 17
+
+Le résultat du défi quotidien deviendra définitif après victoire ; le bouton
+Rejouer demeure une exception de test provisoire. Les [règles de game design](daily-impossible-design.md)
+précisent les objectifs de difficulté, les durées, les références et les évolutions
+retenues, ainsi que les décisions produit qui ne sont pas encore implémentées.

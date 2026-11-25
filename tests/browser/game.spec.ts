@@ -1,24 +1,24 @@
 import { expect, test, type Page } from '@playwright/test';
 import type Phaser from 'phaser';
-import type { TestScene } from '../../src/game/TestScene';
+import type { GameScene } from '../../src/game/GameScene';
 declare global { interface Window { __game: Phaser.Game } }
 const state = (page: Page) => page.evaluate(() => {
-  const s = window.__game.scene.getScene('test') as TestScene;
+  const s = window.__game.scene.getScene('game') as GameScene;
   const b = s.player.body;
   return { x: b.center.x, y: b.bottom, vx: b.velocity.x, vy: b.velocity.y, grounded: b.blocked.down || b.touching.down };
 });
 const frames = (page: Page, count: number) => page.evaluate(n => new Promise<void>(resolve => {
-  const scene = window.__game.scene.getScene('test');
+  const scene = window.__game.scene.getScene('game');
   const tick = () => { if (--n <= 0) { scene.events.off('postupdate', tick); resolve(); } };
   scene.events.on('postupdate', tick);
 }), count);
 const reset = async (page: Page, x = 320) => {
-  await page.evaluate(x => (window.__game.scene.getScene('test') as TestScene).player.body.reset(x, 490), x);
+  await page.evaluate(x => (window.__game.scene.getScene('game') as GameScene).player.body.reset(x, 490), x);
   await expect.poll(async () => (await state(page)).grounded).toBe(true);
 };
 test.beforeEach(async ({ page }) => {
-  await page.goto('/?test');
-  await page.waitForFunction(() => Boolean((window.__game?.scene.getScene('test') as TestScene | undefined)?.player?.body));
+  await page.goto('/?test&level=prototype');
+  await page.waitForFunction(() => Boolean((window.__game?.scene.getScene('game') as GameScene | undefined)?.player?.body));
 });
 test('floor, movement, world boundary and platform landing', async ({ page }) => {
   await reset(page, 42); expect((await state(page)).y).toBeCloseTo(518, 0);
@@ -38,7 +38,7 @@ test('variable height, no automatic bounce or air jump', async ({ page }) => {
   const jump = async (hold: number) => {
     await reset(page);
     await page.evaluate(() => {
-      const s = window.__game.scene.getScene('test') as TestScene;
+      const s = window.__game.scene.getScene('game') as GameScene;
       s.registry.set('apex', s.player.y);
       const track = () => s.registry.set('apex', Math.min(s.registry.get('apex') as number, s.player.y));
       s.events.on('postupdate', track);
@@ -46,7 +46,7 @@ test('variable height, no automatic bounce or air jump', async ({ page }) => {
     });
     await page.keyboard.down('Space'); await frames(page, hold); await page.keyboard.up('Space'); await frames(page, 65);
     return page.evaluate(() => {
-      const s = window.__game.scene.getScene('test');
+      const s = window.__game.scene.getScene('game');
       (s.registry.get('stopTracking') as () => void)(); return s.registry.get('apex') as number;
     });
   };
@@ -199,11 +199,11 @@ for (const interruption of ['blur', 'visibilitychange', 'lostpointercapture'] as
 }
 
 const runState = (page: Page) => page.evaluate(() => {
-  const s = window.__game.scene.getScene('test') as TestScene;
+  const s = window.__game.scene.getScene('game') as GameScene;
   return { phase: s.run.phase, deaths: s.run.deaths };
 });
 const place = (page: Page, x: number, y: number) => page.evaluate(({ x, y }) => {
-  (window.__game.scene.getScene('test') as TestScene).player.body.reset(x, y);
+  (window.__game.scene.getScene('game') as GameScene).player.body.reset(x, y);
 }, { x, y });
 
 test('lethal overlap counts once, respawns and clears held keyboard input', async ({ page }) => {
@@ -288,7 +288,7 @@ test('the course can be completed with keyboard jumps without teleporting', asyn
     const direction = (await state(page)).x < target ? 'ArrowRight' : 'ArrowLeft';
     await page.keyboard.down(direction);
     await page.waitForFunction(({ target, direction }) => {
-      const x = (window.__game.scene.getScene('test') as TestScene).player.x;
+      const x = (window.__game.scene.getScene('game') as GameScene).player.x;
       return direction === 'ArrowRight' ? x >= target : x <= target;
     }, { target, direction });
     await page.keyboard.up(direction);

@@ -126,7 +126,7 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 ## ADR-014 — Boucle de gameplay locale et transitions uniques
 
 - **Date** : 2026-11-24.
-- **Statut** : boucle implémentée et validée sur iPhone selon l’utilisateur ; revue de la PR #9 et vérification des nouvelles corrections ergonomiques à effectuer.
+- **Statut** : boucle implémentée et validée sur iPhone selon l’utilisateur ; PR #9 intégrée dans main à `3484110` ; la phase 17 poursuit le level design, avec validation iPhone finale à effectuer.
 - **Contexte** : prolonger le prototype validé par une boucle courte sans services ni niveau quotidien.
 - **Décision** : trois zones de pics fixes, détection par overlap Arcade, drapeau sur la dernière plateforme. Une petite classe `Run` porte les états playing/respawning/won et le compteur de morts. Seul playing accepte mort ou victoire ; une mort précède la réapparition de 180 ms. Rejouer remet toute la partie à zéro, sans recharger la page.
 - **Justification** : transitions testables sans moteur, garde contre les collisions répétées, parcours réalisable par les commandes existantes. La scène reste responsable de la physique et de l’affichage minimal HTML.
@@ -140,6 +140,33 @@ Registre initial établi le **8 novembre 2026** à partir d’[AGENTS.md](../../
 - **Décision** : les agents peuvent publier et republier les versions de développement sur la prévisualisation Tailscale existante. Autorisation limitée aux releases statiques ; production, accès public, fusion, infrastructure, services, réseau et permissions sont exclus.
 - **Justification** : conserver une boucle de test courte avec les mécanismes déjà installés.
 - **Conséquences** : SHA identifié, préparation isolée, contrôles types/unitaires/navigateur/build, publication atomique, vérification HTTPS et révision servie, ancienne release conservée et restauration en cas d’échec. Les approbations natives du sandbox restent applicables. Aucun déclencheur automatique n’est installé ; un changement documentaire seul ne déclenche pas de publication. Cette décision précise l’autorisation humaine d’ADR-004 pour ce seul environnement.
+
+## ADR-016 — Niveaux déclaratifs et scène commune
+
+- **Date** : 2026-11-25.
+- **Statut** : implémentée dans la branche de phase 17 ; revue et validation iPhone à effectuer.
+- **Contexte** : agrandir le parcours et préparer un éditeur et des défis quotidiens sans les développer maintenant.
+- **Décision** : interface `Level` sérialisable, géométries rectangulaires en coordonnées monde, départ au centre du joueur ; `GameScene` reçoit le niveau. Validation géométrique à la création, ancien terrain conservé en fixture de développement, premier parcours original dans `src/levels/first.ts`.
+- **Justification** : rendre les données indépendantes de Phaser, sans DSL, ECS, backend ni format d’éditeur prématuré.
+- **Conséquences** : types et tests unitaires pour la cohérence, test navigateur sans téléportation pour la faisabilité ; les imports non fiables nécessiteront un parseur dédié. Voir [format](../level-format.md).
+
+## ADR-017 — Caméra bornée et anticipation douce
+
+- **Date** : 2026-11-25.
+- **Statut** : implémentée ; confort mobile à valider.
+- **Contexte** : conserver le portrait et trois commandes fixes dans un monde plus grand que l’écran.
+- **Décision** : caméra Phaser avec suivi interpolé horizontal/vertical, zone de tolérance, anticipation horizontale réversible progressivement, limites du niveau. Recentrage immédiat au départ lors de la réapparition ; interface HTML fixe.
+- **Justification** : montrer le prochain danger sans suivre chaque petit mouvement, en utilisant le moteur existant.
+- **Conséquences** : pas de changement physique, zoom ou secousse ; tests des limites, deux axes, retour au départ et invariance des commandes. Valider lisibilité et confort sur iPhone.
+
+## ADR-018 — Cadre de game design Daily Impossible
+
+- **Date** : 2026-11-25.
+- **Statut** : règles produit explicitement validées ; livraison partielle en phase 17.
+- **Contexte** : précision et potentiel speedrun inspirés de Celeste, défi commun et résultat définitif inspirés de Wordle, adaptés au mobile sans copie de contenu.
+- **Décision** : règles, objectifs de calibration et évolutions décrits dans [Daily Impossible — design](../daily-impossible-design.md). Portrait, trois boutons, vies illimitées sans checkpoint, difficulté élevée croissante dans la semaine ; objectifs 20–40 s sans erreur et 2–3 min pour la première réussite.
+- **Justification** : disposer d’un cadre cohérent avant la bêta et le système quotidien.
+- **Conséquences** : résultat quotidien définitif, suspension/reprise/abandon, persistance et classement morts puis temps sont décidés mais non implémentés. Rejouer reste provisoire. Wall Slide/Jump, éditeur et Perfect Run sont reportés ; double saut et dash non retenus. Taux de réussite inférieur à 25 % à calibrer, pas une mesure acquise.
 
 ## Orientations et choix encore à confirmer
 
